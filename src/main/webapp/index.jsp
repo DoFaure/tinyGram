@@ -6,7 +6,7 @@
 <script src="https://apis.google.com/js/platform.js" async defer></script>
 <meta name="google-signin-scope" content="profile email">
 <meta name="google-signin-client_id"
-     content="">
+     content="550815994072-36h7qlml8j1epa1n4mj1i2oklsikhd23.apps.googleusercontent.com">
 <title>Login page</title>
 </head>
 
