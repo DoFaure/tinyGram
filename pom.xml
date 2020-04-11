@@ -101,6 +101,16 @@
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-datastore</artifactId>
         </dependency>
+        <dependency>
+		    <groupId>com.google.http-client</groupId>
+		    <artifactId>google-http-client-jackson</artifactId>
+		    <version>1.15.0-rc</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.google.oauth-client</groupId>
+		    <artifactId>google-oauth-client-java6</artifactId>
+		    <version>1.15.0-rc</version>
+		</dependency>
         <!-- Test Dependencies -->
             
         <dependency>
@@ -132,6 +142,11 @@
                 <artifactId>appengine-maven-plugin</artifactId>
                         
                 <version>${appengine.maven.plugin.version}</version>
+                
+                 <configuration>
+				    <deploy.projectId>module-application-cloud</deploy.projectId>
+				    <deploy.version>1</deploy.version>
+				  </configuration>
                       
             </plugin>
                   
