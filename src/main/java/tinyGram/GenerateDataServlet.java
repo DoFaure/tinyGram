@@ -3,6 +3,7 @@ package tinyGram;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -31,8 +32,11 @@ public class GenerateDataServlet extends HttpServlet{
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		
 		Random r = new Random();
+		int numberOfPost = 1;
+		ArrayList<Entity> postsList = new ArrayList();
+		ArrayList<Entity> usersList = new ArrayList();
 		// Create users
-		for (int i = 0; i < 500; i++) {
+		for (int i = 1; i <= 200; i++) {
 			Entity user = new Entity("User", "u" + i);
 			user.setProperty("firstName", "first" + i);
 			user.setProperty("lastName", "last" + i);
@@ -41,15 +45,16 @@ public class GenerateDataServlet extends HttpServlet{
 			
 			// Create user friends
 			HashSet<String> friends = new HashSet<String>();
-			while(friends.size() < 200) {
-				friends.add("friend" + r.nextInt(500));
-			}
+			while(friends.size() < r.nextInt(50)) {
+				friends.add("u" + (r.nextInt(200-1)+1));
+			} 
 			user.setProperty("friends", friends);
 
 			//Create user posts
 			HashSet<String> posts = new HashSet<String>();
-			for(int j=0;j<r.nextInt(100);j++) {
-				Entity post = new Entity("Post","post"+j);
+			for(int j=1;j<(r.nextInt(100-1)+1);j++) {
+				Entity post = new Entity("Post","post"+numberOfPost);
+				numberOfPost++;
 				post.setProperty("user", KeyFactory.keyToString(user.getKey()));
 				post.setProperty("body", "body"+j);		
 				//Random time stamp
@@ -58,29 +63,32 @@ public class GenerateDataServlet extends HttpServlet{
 				try {
 					Calendar c = Calendar.getInstance();			
 					date = format.parse(c.get(Calendar.YEAR)+"-"+r.nextInt(12)+"-"+r.nextInt(30)+" "+r.nextInt(24)+":"+r.nextInt(60)+":00");
-				} catch (ParseException e1) {
+				} catch (ParseException e) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					e.printStackTrace();
 				}  			
 				post.setProperty("date", date);
 				post.setProperty("URL", "http://imagePostTinyGram"+j+".com");
 				HashSet<String> likes = new HashSet<String>();
-				for(int k=0; k < 150;k++ ) {
-					likes.add("user"+r.nextInt(500));
+				for(int k=0; k < 150; k++ ) {
+					likes.add("u"+r.nextInt(500));
 				}
 				post.setProperty("likes", likes);
-				
-				datastore.put(post);
+				posts.add(post.getKey().getName());
+				postsList.add(post);
 				
 			}
 			user.setProperty("posts", posts);
 			
-			datastore.put(user);
+			usersList.add(user);
 
 
-			response.getWriter().print("<li> created friend:" + user.getKey() + "<br>" + friends + "<br>");
-
+		//	response.getWriter().print("<li> created friend:" + user.getKey() + "<br>" + friends + "<br>" + "<br>" + posts + "<br>");
+			response.getWriter().print("i : "+i);
 		}
+		
+		datastore.put(usersList);
+		datastore.put(postsList);
 	}
 }
  
