@@ -13,78 +13,50 @@
       
     <properties>
             
-        <appengine.maven.plugin.version>2.2.0</appengine.maven.plugin.version>
-            
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-            
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-            
-        <maven.compiler.source>1.8</maven.compiler.source>
-            
-        <maven.compiler.target>1.8</maven.compiler.target>
-            
+        <appengine.maven.plugin.version>2.2.0</appengine.maven.plugin.version>            
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
+        <maven.compiler.source>1.8</maven.compiler.source>            
+        <maven.compiler.target>1.8</maven.compiler.target>            
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
+        <endpoints.project.id>module-application-cloud</endpoints.project.id>
           
     </properties>
       
-    <dependencyManagement>
-            
-        <dependencies>
-                  
-            <dependency>
-                        
-                <groupId>com.google.cloud</groupId>
-                        
-                <artifactId>libraries-bom</artifactId>
-                        
-                <version>4.4.0</version>
-                        
-                <type>pom</type>
-                        
-                <scope>import</scope>
-                      
-            </dependency>
-                
-        </dependencies>
-          
+    <dependencyManagement>           
+        <dependencies>                  
+            <dependency>                        
+                <groupId>com.google.cloud</groupId>                        
+                <artifactId>libraries-bom</artifactId>                        
+                <version>4.4.0</version>                        
+                <type>pom</type>                        
+                <scope>import</scope>                      
+            </dependency>                
+        </dependencies>          
     </dependencyManagement>
       
     <dependencies>
             
         <!-- Compile/runtime dependencies -->
             
-        <dependency>
-                  
-            <groupId>javax.servlet</groupId>
-                  
-            <artifactId>javax.servlet-api</artifactId>
-                  
-            <version>3.1.0</version>
-                  
-            <scope>provided</scope>
-                
+        <dependency>                  
+            <groupId>javax.servlet</groupId>                  
+            <artifactId>javax.servlet-api</artifactId>                  
+            <version>3.1.0</version>                  
+            <scope>provided</scope>                
         </dependency>
             
-        <dependency>
-                  
-            <groupId>javax.servlet.jsp</groupId>
-                  
-            <artifactId>javax.servlet.jsp-api</artifactId>
-                  
-            <version>2.3.1</version>
-                  
-            <scope>provided</scope>
-                
+        <dependency>                  
+            <groupId>javax.servlet.jsp</groupId>                  
+            <artifactId>javax.servlet.jsp-api</artifactId>                  
+            <version>2.3.1</version>                  
+            <scope>provided</scope>                
         </dependency>
             
-        <dependency>
-                  
-            <groupId>jstl</groupId>
-                  
-            <artifactId>jstl</artifactId>
-                  
+        <dependency>                  
+            <groupId>jstl</groupId>                  
+            <artifactId>jstl</artifactId>                  
             <version>1.2</version>
-                
         </dependency>
             
         <dependency>
@@ -92,6 +64,11 @@
             <artifactId>endpoints-framework</artifactId>
             <version>2.2.1</version>
         </dependency>
+        <dependency>
+			<groupId>com.google.endpoints</groupId>
+		    <artifactId>endpoints-management-control-appengine-all</artifactId>
+	 	    <version>1.0.12</version>
+		</dependency>
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
@@ -132,65 +109,51 @@
         <!-- for hot reload of the web application-->
             
         <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
+           
+           
             
-        <plugins>
-                  
-            <plugin>
-                        
-                <groupId>com.google.cloud.tools</groupId>
-                        
-                <artifactId>appengine-maven-plugin</artifactId>
-                        
-                <version>${appengine.maven.plugin.version}</version>
-                
+        <plugins>   
+                      
+            <plugin>          
+                <groupId>com.google.cloud.tools</groupId>                        
+                <artifactId>appengine-maven-plugin</artifactId>                        
+                <version>${appengine.maven.plugin.version}</version>                
                  <configuration>
 				    <deploy.projectId>module-application-cloud</deploy.projectId>
 				    <deploy.version>1</deploy.version>
-				  </configuration>
-                      
+				  </configuration>                      
             </plugin>
-                  
-      
+            
             <plugin>
-                        
-                <groupId>org.apache.maven.plugins</groupId>
-                        
-                <artifactId>maven-enforcer-plugin</artifactId>
-                        
-                <version>3.0.0-M3</version>
-                        
-                <executions>
-                              
-                    <execution>
-                                    
-                        <id>enforce-maven</id>
-                                    
-                        <goals>
-                                          
-                            <goal>enforce</goal>
-                                        
-                        </goals>
-                                    
-                        <configuration>
-                                          
-                            <rules>
-                                                
-                                <!-- appengine-maven-plugin requires Maven 3.5.0 or later -->
-                                                
-                                <requireMavenVersion>
-                                                      
-                                    <version>3.5.0</version>
-                                                    
-                                </requireMavenVersion>
-                                              
-                            </rules>
-                                        
-                        </configuration>
-                                  
-                    </execution>
-                            
-                </executions>
-                      
+			  	<groupId>com.google.cloud.tools</groupId>
+			  	<artifactId>endpoints-framework-maven-plugin</artifactId>
+			  	<version>2.0.1</version>
+			  	<configuration>
+			    	<!-- plugin configuration -->
+			    	<hostname>${endpoints.project.id}.appspot.com</hostname>
+			  	</configuration>
+			</plugin>
+                  
+            <plugin>                        
+                <groupId>org.apache.maven.plugins</groupId>                        
+                <artifactId>maven-enforcer-plugin</artifactId>                        
+                <version>3.0.0-M3</version>                        
+                <executions>                              
+                    <execution>                                    
+                        <id>enforce-maven</id>                                    
+                        <goals>                                          
+                            <goal>enforce</goal>                                        
+                        </goals>                                   
+                        <configuration>                                         
+                            <rules>                                                
+                                <!-- appengine-maven-plugin requires Maven 3.5.0 or later -->                                                
+                                <requireMavenVersion>                                                      
+                                    <version>3.5.0</version>                                                    
+                                </requireMavenVersion>                                              
+                            </rules>                                        
+                        </configuration>                                 
+                    </execution>                            
+                </executions>                      
             </plugin>
                 
         </plugins>

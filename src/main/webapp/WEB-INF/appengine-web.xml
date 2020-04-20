@@ -12,6 +12,11 @@
   <static-files>
 	<include path="/resources/**" />
 	<include path="/bootstrap/**"/>
+	<include path="/font-awesome/**"/>
   </static-files>
+  
+  <env-variables>
+    <env-var name="ENDPOINTS_SERVICE_NAME" value="module-application-cloud.appspot.com" />
+  </env-variables>
 
 </appengine-web-app>

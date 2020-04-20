@@ -26,6 +26,7 @@
 
 .card {		
     margin: 10px; /* Added */
+    margin-bottom: 20px;
 }
 
 .scrollable{
@@ -50,5 +51,8 @@
   	justify-content: center;
   	margin-top: 20px;
 }
+
+/* .date{ */
+/* 	float:right; */
+/* } */
 	
-}

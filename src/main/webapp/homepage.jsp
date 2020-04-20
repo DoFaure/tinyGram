@@ -1,5 +1,7 @@
 <%@ page import="com.google.appengine.api.users.UserServiceFactory"%>
 <%@ page import="java.security.Principal"%>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="com.google.appengine.api.datastore.DatastoreService"%>
 <%@ page import="com.google.appengine.api.datastore.Key"%>
 <%@ page import="com.google.appengine.api.datastore.DatastoreServiceFactory"%>
@@ -13,11 +15,11 @@
 
 
 <%!UserService userService = UserServiceFactory.getUserService();%>
-
+<%!DatastoreService datastore  = DatastoreServiceFactory.getDatastoreService(); %>
+<%!SimpleDateFormat formatDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); %>
 <%if(!userService.isUserLoggedIn()){ 
 	response.sendRedirect("/login"); 
 }else{
-	DatastoreService datastore  = DatastoreServiceFactory.getDatastoreService();
 	//Get connected user informations
 	Entity e;
 	try {
@@ -42,6 +44,11 @@
     <link rel="shortcut icon" href="resources/img/logo.png" type="image/x-icon">
     <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.css" rel="stylesheet">
     <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.js"></script>
+    
 </head>
 <body>
 <!-- 	navbar / menu -->
@@ -67,17 +74,47 @@
  <div class="row">
   <div class="col-8">
   <c:forEach items="${posts}" var="post">
+  <c:set var="postUser" value="${post.properties.user}" scope="request" />
+  <c:set var="postDate" value="${post.properties.date}" scope="request" />
+  <c:set var="postLikes" value="${post.properties.likes}" scope="request" />
         <div class="margin-top flex">
             <div class="card">
-				<img class="card-img-top" src="" >
+            	<div class="card-header d-flex align-items-center">
+	            	<h5>
+	            	<%=datastore.get(KeyFactory.stringToKey((String) request.getAttribute("postUser"))).getProperty("firstName") %>
+	            	<%=datastore.get(KeyFactory.stringToKey((String) request.getAttribute("postUser"))).getProperty("lastName") %>
+	            	</h5>
+	            	<div class="col-sm-5 ml-auto">
+		            	<h6 class="date">
+		        		<%= formatDate.format(request.getAttribute("postDate")) %>
+		            	</h6>
+	            	</div>
+            	</div>
+				<img class="card-img-top" src="${post.properties.URL}" alt="url-image-post : <c:out value=" ${post.properties.URL}"/>" >
 				<div class="card-body">
-				 	   <p class="card-text"><c:out value="${post}" /></p>
+				 	<p class="card-text"><c:out value="${post.properties.body}" /></p>
 				</div>
+				<div class="card-footer text-muted">
+					<% ArrayList<String> likedBy = (ArrayList<String>) request.getAttribute("postLikes"); %>
+					<p class="card-text">
+					<%if(likedBy.contains(request.getUserPrincipal().getName())){ %>
+						<a href="/unlike" class="icon-block">
+						<i class="fa fa-heart" style="color:#FF0000"></i>
+						</a>
+					<%}else{ %> 
+						<a href="/like" class="icon-block">
+						<i class="fa fa-heart-o" style="color:#FF0000"></i> 
+						</a>
+					<%} %>
+						<%= likedBy.size() %> likes
+					
+					</p>
+  				</div>
 			</div>
         </div>
-</c:forEach>
+  </c:forEach>
   </div>
-  
+
 <!--  members card / to follow and unfollow -->
   <div class="col-4">
   	<div class="card ">

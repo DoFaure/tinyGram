@@ -18,7 +18,6 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.cloud.Timestamp;
 
 @WebServlet(name = "GenerateData", urlPatterns = { "/generateDatas" })
 public class GenerateDataServlet extends HttpServlet{
@@ -26,6 +25,7 @@ public class GenerateDataServlet extends HttpServlet{
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		
+		response.getWriter().print("<a href = '/../index.jsp'> Retour </a>");		
 
 		response.setContentType("text/html");
 		response.setCharacterEncoding("UTF-8");
