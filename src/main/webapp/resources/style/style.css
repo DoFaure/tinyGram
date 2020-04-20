@@ -1,0 +1,45 @@
+.navbar-nav.navbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translatex(-50%);
+}
+
+.icon-nav{
+	width: 32px !important;
+   	height: 32px !important;
+   	margin-right: 5px;
+}
+
+.navbar-nav.navbar-left{
+   display: inline-block;
+   margin-left: 5px;
+}
+
+.navbar-nav.navbar-right{
+   display: inline-block;
+   margin-left: 5px;
+}
+
+.row{
+	margin-top : 10px;
+}
+
+.card {		
+    margin: 10px; /* Added */
+}
+
+.scrollable{
+  overflow-y: auto;
+  max-height: 350px;
+}
+
+.identity, .follow {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 5px;
+}
+
+.identity{
+	width: 150px;
+	font-size: small;
+}

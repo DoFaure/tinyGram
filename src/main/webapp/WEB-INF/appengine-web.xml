@@ -8,5 +8,10 @@
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
   </system-properties>
+  
+  <static-files>
+	<include path="/resources/**" />
+	<include path="/bootstrap/**"/>
+  </static-files>
 
 </appengine-web-app>

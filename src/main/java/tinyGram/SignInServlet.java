@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 //With @WebServlet annotation the webapp/WEB-INF/web.xml is no longer required.
 @WebServlet(
    name = "Login",
-   description = "LoginAPI: Login / Logout with UserService",
+   description = "LoginAPI: Login",
    urlPatterns = "/login"
 )
 public class SignInServlet extends HttpServlet {
@@ -25,8 +25,13 @@ public class SignInServlet extends HttpServlet {
    resp.setContentType("text/html");
 
      resp.getWriter()
-         .println(
-             "<p>Please <a href=\"" + userService.createLoginURL("/../homepage.jsp") + "\">sign in</a>.</p>");
+         	.println(
+         		 "<p>Please <a href=\"" + userService.createLoginURL("/homepage") + "\">sign in</a>.</p>");
+     
+     resp.getWriter()
+ 		 	.println(
+ 				 "<br>"
+				 + "<br>"
+	     		 + "<p>Return to <a href=\"" + resp.encodeRedirectURL("/../index.jsp")  + "\">index</a>.</p>");
  }
 }
-//[END users_API_example]

@@ -22,29 +22,39 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 @WebServlet(name = "DeleteData", urlPatterns = { "/deletedata" })
-
-public class deleteGenerateData extends HttpServlet{
+public class DeleteGenerateData extends HttpServlet{
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {	
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();	
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("text/html");
-		resp.getWriter().print("<a href = '/index.jsp'> Retour a l'index </a>");	
+		
+		//Store all the keys 
+		ArrayList<Key> keys = new ArrayList<Key>();
+		
+		//Delete User Entity datas
 		Query q = new Query("User");		
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());	
-		ArrayList<Key> keys = new ArrayList<Key>();
 		for (Entity entity : result) {
 			keys.add(entity.getKey());			
 		}
+		
+		//Delete Post Entity datas
 		q = new Query("Post");		
 		pq = datastore.prepare(q);
 		result = pq.asList(FetchOptions.Builder.withDefaults());			
 		for (Entity entity : result) {
 			keys.add(entity.getKey());			
 		}
-		datastore.delete(keys);		
+		
+		//Transaction delete
+		datastore.delete(keys);	
+		
+		
+		resp.getWriter().print("<p> Deletation success </p>");
+		resp.getWriter().print("<a href = '/index.jsp'> Retour a l'index </a>");
 	}
 }
 
