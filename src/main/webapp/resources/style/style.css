@@ -43,3 +43,12 @@
 	width: 150px;
 	font-size: small;
 }
+
+.signout{
+  	display: flex;
+  	align-items: center;
+  	justify-content: center;
+  	margin-top: 20px;
+}
+	
+}

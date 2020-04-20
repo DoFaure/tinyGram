@@ -3,6 +3,7 @@ package tinyGram;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -23,6 +24,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
@@ -56,7 +58,9 @@ public class ShowFriendsPosts extends HttpServlet{
 		
 		//all friends for the connected User
 		ArrayList<String> listOfFriends = new ArrayList<String>();
-		ArrayList<Key> keys = new ArrayList<Key>();	
+		ArrayList<Key> friendsKeys = new ArrayList<Key>();	
+		ArrayList<Key> friendsPostsKeys = new ArrayList<Key>();	
+
 		Entity user;
 		Key userKey = KeyFactory.createKey("User", request.getUserPrincipal().getName());
 		try {
@@ -72,21 +76,36 @@ public class ShowFriendsPosts extends HttpServlet{
 		if(listOfFriends != null) {
 			
 			for(String friend : listOfFriends){
-				keys.add(KeyFactory.createKey("User", friend));
+				friendsKeys.add(KeyFactory.createKey("User", friend));
 			}
-			Filter propertyFilter =   new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN,keys);
+			Filter propertyFilter =   new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN,friendsKeys);
 			Query qu = new Query("User").setFilter(propertyFilter);
 			PreparedQuery pqu = datastore.prepare(qu);
-			List<Entity> result = pqu.asList(FetchOptions.Builder.withDefaults());
+			List<Entity> resultFriends = pqu.asList(FetchOptions.Builder.withDefaults());
 			
-			request.setAttribute("friends", result);
+			request.setAttribute("friends", resultFriends);
 			
-//			for(Key u : keys) {
-//				//response.getWriter().print(u.getProperty(""));
-//				response.getWriter().print(u);
+			//Then get All posts from friends
+			ArrayList<String> posts = new ArrayList<String>();			
+			for(Entity r : resultFriends) {
+				posts.addAll((ArrayList<String>) r.getProperty("posts"));
+			}
+		
+			//Query to get all posts informations
+			for(String post : posts) {
+				friendsPostsKeys.add(KeyFactory.createKey("Post", post));
+			}
+			Filter propertyPostsFilter =   new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN,friendsPostsKeys);
+			Query qp = new Query("Post").setFilter(propertyPostsFilter).addSort("date", SortDirection.DESCENDING);
+			PreparedQuery pqp = datastore.prepare(qp);
+			List<Entity> resultPosts = pqp.asList(FetchOptions.Builder.withDefaults());
+			
+			request.setAttribute("posts", resultPosts);
+			//test loop
+//			for(Entity post : resultPosts) {
+//				response.getWriter().print(post);
 //			}
 			
-
 		}
 
 		request.setAttribute("users", listOfUsers);

@@ -18,30 +18,29 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Entity;
 
 
-@WebServlet(name = "Follow", urlPatterns = { "/follow" })
-
-public class FollowQuery extends HttpServlet{
+@WebServlet(name = "Unfollow", urlPatterns = { "/unfollow" })
+public class UnfollowQuery extends HttpServlet {
+	
+	
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Key userToFollowKey = KeyFactory.stringToKey(request.getParameter("key"));
+		Key userToUnfollowKey = KeyFactory.stringToKey(request.getParameter("key"));
 		Key userKey = KeyFactory.createKey("User", request.getUserPrincipal().getName());
 		
 		Transaction transac = datastore.beginTransaction();
-		try {			
+		try {	
 			Entity user = datastore.get(userKey);
 			ArrayList<String> friends = (ArrayList<String>) user.getProperty("friends");
-			if(friends == null) {
-				friends = new ArrayList<String>();
-			}	
-			friends.add(userToFollowKey.getName());			
+			friends.remove(userToUnfollowKey.getName());
 			user.setProperty("friends", friends);
-			datastore.put(transac,user);		
+			datastore.put(transac, user);
 			transac.commit();
 			response.sendRedirect("/homepage");
 			
 		//catch is necessary for the datastore.get() method
-		} catch (EntityNotFoundException e) {
+		}catch (EntityNotFoundException e) {
 			e.printStackTrace();
 			response.sendRedirect("/homepage");
 
@@ -51,5 +50,6 @@ public class FollowQuery extends HttpServlet{
 				transac.rollback();
 			}
 		}
+
 	}
 }
