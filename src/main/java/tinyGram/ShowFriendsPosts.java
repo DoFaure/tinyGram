@@ -28,6 +28,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.auth.ServiceAccountSigner;
 
 
 @WebServlet(name = "Homepage", urlPatterns = { "/homepage" })
@@ -37,7 +38,8 @@ public class ShowFriendsPosts extends HttpServlet{
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 	
 		UserService userService = UserServiceFactory.getUserService();		
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();		
+		//response.getWriter().print(userService.getCurrentUser().);
 		
 		//Create User if it's first connection
 		Principal newUser = request.getUserPrincipal();	
@@ -46,8 +48,10 @@ public class ShowFriendsPosts extends HttpServlet{
 		try {
 			e = datastore.get(keyNewUser);
 		} catch (EntityNotFoundException ex) {
+			
 			e = new Entity("User", request.getUserPrincipal().getName());
 			e.setProperty("mail", userService.getCurrentUser().getEmail());
+			e.setProperty("firstName", userService.getCurrentUser().getNickname());
 			datastore.put(e);
 		}	
 
@@ -121,8 +125,5 @@ public class ShowFriendsPosts extends HttpServlet{
 		
 	}
 	
-//	public String toString(Object obj) {
-//		return (String) obj;
-//	}
 }
 

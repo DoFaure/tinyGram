@@ -21,9 +21,7 @@ version="v1",
 namespace = @ApiNamespace(ownerDomain = "helloworld.example.com",
     ownerName = "helloworld.example.com",
     packagePath = ""))
-public class tinyGramEndpoint {
-	
-	Random r=new Random();
+public class TinyGramEndpoint {
 
 	@ApiMethod(name = "users",	httpMethod = HttpMethod.GET)
 	public List<Entity> users() {
@@ -31,7 +29,17 @@ public class tinyGramEndpoint {
 
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			PreparedQuery pq = datastore.prepare(q);
-			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(250));
+			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(500));
+			return result;
+	}	
+	
+	@ApiMethod(name = "posts",	httpMethod = HttpMethod.GET)
+	public List<Entity> posts() {
+			Query q =new Query("Post");
+
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+			PreparedQuery pq = datastore.prepare(q);
+			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(500));
 			return result;
 	}	
 }

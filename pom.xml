@@ -130,7 +130,7 @@
 			  	<version>2.0.1</version>
 			  	<configuration>
 			    	<!-- plugin configuration -->
-			    	<hostname>${endpoints.project.id}.appspot.com</hostname>
+			    	<hostname>module-application-cloud.appspot.com</hostname>
 			  	</configuration>
 			</plugin>
                   
