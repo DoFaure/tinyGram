@@ -17,6 +17,7 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 
 
 @Api(name = "tinyGramApi",
+version="v1",
 namespace = @ApiNamespace(ownerDomain = "helloworld.example.com",
     ownerName = "helloworld.example.com",
     packagePath = ""))

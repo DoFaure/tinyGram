@@ -25,7 +25,7 @@ public class GenerateDataServlet extends HttpServlet{
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		
-		response.getWriter().print("<a href = '/../index.jsp'> Retour </a>");		
+		response.getWriter().print("<a href = '/../index.jsp'> Back to index </a>");		
 
 		response.setContentType("text/html");
 		response.setCharacterEncoding("UTF-8");

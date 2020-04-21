@@ -98,11 +98,11 @@
 					<% ArrayList<String> likedBy = (ArrayList<String>) request.getAttribute("postLikes"); %>
 					<p class="card-text">
 					<%if(likedBy.contains(request.getUserPrincipal().getName())){ %>
-						<a href="/unlike" class="icon-block">
+						<a href="/unlike?key=${KeyFactory.keyToString(post.key)}" class="icon-block">
 						<i class="fa fa-heart" style="color:#FF0000"></i>
 						</a>
 					<%}else{ %> 
-						<a href="/like" class="icon-block">
+						<a href="/like?key=${KeyFactory.keyToString(post.key)}" class="icon-block">
 						<i class="fa fa-heart-o" style="color:#FF0000"></i> 
 						</a>
 					<%} %>
