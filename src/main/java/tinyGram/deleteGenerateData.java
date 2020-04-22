@@ -21,7 +21,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-@WebServlet(name = "DeleteData", urlPatterns = { "/deletedata" })
+@WebServlet(name = "DeleteData", urlPatterns = { "/deletedatas" })
 public class DeleteGenerateData extends HttpServlet{
 
 	@Override
@@ -54,7 +54,7 @@ public class DeleteGenerateData extends HttpServlet{
 		
 		
 		resp.getWriter().print("<p> Deletation success </p>");
-		resp.getWriter().print("<a href = '/index.jsp'> Retour a l'index </a>");
+		resp.getWriter().print("<a href = '/index.jsp'> Back to index </a>");
 	}
 }
 

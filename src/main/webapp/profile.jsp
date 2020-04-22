@@ -34,7 +34,7 @@
 %>
 
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,7 +65,7 @@
 	    </div>
 	  </form>
 	  <div class="nav navbar-nav navbar-right">
-	 	  <a class="like" href=""><img class="icon-nav" src="/resources/img/heart.png"></a>
+	 	  <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a>
  	 	  <a class="profile" href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  </div>
 	</nav>

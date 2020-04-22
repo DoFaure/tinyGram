@@ -17,8 +17,10 @@
 
 .navbar-nav.navbar-right{
    display: inline-block;
+   vertical-align: middle;
    margin-left: 5px;
 }
+
 
 .profile-link{
 	color:#2d436b !important;
@@ -27,6 +29,7 @@
 .container{
 	margin-left : 50px;
 	margin-right: 50px;
+	margin-top: 20px;
 }
 
 .row{
@@ -38,15 +41,23 @@
 }
 
 
+.member-col{
+	float:right;
+}
+
+.members{
+	color:black !important;
+}
+
 /* here to change image format on cards */
 .card-img-top{
 	width: 240px;
 	height: 240px;
 }
 
-.scrollable{
-  overflow-y: auto;
-  max-height: 350px;
+.list-members{
+  margin: 5px;
+  text-align: center !important;
 }
 
 .identity, .follow {

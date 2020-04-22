@@ -55,10 +55,14 @@ public class ShowFriendsPosts extends HttpServlet{
 			datastore.put(e);
 		}	
 
-		//all users
-		Query q = new Query("User");
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> listOfUsers = pq.asList(FetchOptions.Builder.withDefaults());
+
+		
+		//first 5 members from database
+		Query qfm = new Query("User");
+		PreparedQuery pqfm = datastore.prepare(qfm);
+		List<Entity> fiveMembers = pqfm.asList(FetchOptions.Builder.withLimit(5));
+		request.setAttribute("users", fiveMembers);
+
 		
 		
 		//all friends for the connected User
@@ -70,7 +74,7 @@ public class ShowFriendsPosts extends HttpServlet{
 		Key userKey = KeyFactory.createKey("User", request.getUserPrincipal().getName());
 		try {
 			user = datastore.get(userKey);
-			listOfUsers.remove(user);
+			fiveMembers.remove(user);
 			listOfFriends = (ArrayList<String>) user.getProperty("friends");
 		} catch (EntityNotFoundException ex) {
 			// TODO Auto-generated catch block
@@ -93,33 +97,32 @@ public class ShowFriendsPosts extends HttpServlet{
 			//Then get All posts from friends
 			ArrayList<String> posts = new ArrayList<String>();			
 			for(Entity r : resultFriends) {
-				posts.addAll((ArrayList<String>) r.getProperty("posts"));
+				if(r.getProperty("posts") != null){
+					posts.addAll((ArrayList<String>) r.getProperty("posts"));
+				}
 			}
 		
 			//Query to get all posts informations
-			for(String post : posts) {
-				friendsPostsKeys.add(KeyFactory.createKey("Post", post));
-			}
-			Filter propertyPostsFilter =   new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN,friendsPostsKeys);
-			Query qp = new Query("Post").setFilter(propertyPostsFilter);
-			PreparedQuery pqp = datastore.prepare(qp);
-			List<Entity> resultPosts = pqp.asList(FetchOptions.Builder.withDefaults());
-			
-			
-			//Sort by Collections.sort because App Engine has limited Parallel Queries 
-			Collections.sort(resultPosts, (y, x) -> ((Date)x.getProperty("date")).compareTo((Date)y.getProperty("date")));
+			if(posts.size()>0) {
+				for(String post : posts) {
+					friendsPostsKeys.add(KeyFactory.createKey("Post", post));
+				}
+				if(friendsPostsKeys.size()>0) {
+					Filter propertyPostsFilter =   new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN,friendsPostsKeys);
+					Query qp = new Query("Post").setFilter(propertyPostsFilter);
+					PreparedQuery pqp = datastore.prepare(qp);
+					List<Entity> resultPosts = pqp.asList(FetchOptions.Builder.withDefaults());
+					
+					
+					//Sort by Collections.sort because App Engine has limited Parallel Queries 
+				//	Collections.sort(resultPosts, (y, x) -> ((Date)x.getProperty("date")).compareTo((Date)y.getProperty("date")));
+					request.setAttribute("posts", resultPosts);
+				}
 				
-			request.setAttribute("posts", resultPosts);
-			
-			//test loop
-//			for(Entity post : resultPosts) {
-//					response.getWriter().print(post.getProperty("likes"));			
-//				
-//			}
+			}	
 			
 		}
-
-		request.setAttribute("users", listOfUsers);
+		
 		
 		request.getRequestDispatcher("/homepage.jsp").forward(request, response);
 		

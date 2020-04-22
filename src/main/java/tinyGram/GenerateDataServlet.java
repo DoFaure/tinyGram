@@ -3,11 +3,15 @@ package tinyGram;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -34,7 +38,7 @@ public class GenerateDataServlet extends HttpServlet{
 		
 		Random r = new Random();
 		//Incremental Post key 
-		int numberOfPost = 1;
+		
 		
 		//Create lists to avoid saturation of datastore.put
 		ArrayList<Entity> postsList = new ArrayList();
@@ -56,22 +60,19 @@ public class GenerateDataServlet extends HttpServlet{
 			
 			//Create user posts
 			HashSet<String> posts = new HashSet<String>();
-			for(int j=1;j<(r.nextInt(100-1)+1);j++) {
-				Entity post = new Entity("Post","post"+numberOfPost);
-				numberOfPost++;
+			for(int j=1;j<=(r.nextInt(20-1)+1);j++) {
+				
+				//EPOCH random value between 2008 and now.
+				long epoch = ThreadLocalRandom.current().nextLong((long) 1199221200000L,Instant.now().toEpochMilli() );
+				//ID of posts is MAX 64-BIT Value minus EPOCH value to get posts in order of date.
+				String id = Long.toString(Long.MAX_VALUE-epoch); 
+				Entity post = new Entity("Post", id);
 				post.setProperty("user", KeyFactory.keyToString(user.getKey()));
-				post.setProperty("body", "body"+j);	
+				post.setProperty("body", "Message of the post"+j);	
 				
 				//From StackOverflow -- generate random date time with Timestamp using Google App Engine
-				Date date = new Date();	
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");	
-				try {
-					Calendar c = Calendar.getInstance();			
-					date = format.parse(c.get(Calendar.YEAR)+"-"+r.nextInt(12)+"-"+r.nextInt(30)+" "+r.nextInt(24)+":"+r.nextInt(60)+":"+r.nextInt(60));
-				} catch (ParseException e) {
-					e.printStackTrace();
-				} 
-				
+				Instant instant = Instant.ofEpochMilli(epoch);	
+				Date date = Date.from(instant);
 				
 				post.setProperty("date", date);
 				post.setProperty("URL", "http://imagePostTinyGram"+j+".com");

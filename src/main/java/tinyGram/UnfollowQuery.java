@@ -37,12 +37,12 @@ public class UnfollowQuery extends HttpServlet {
 			user.setProperty("friends", friends);
 			datastore.put(transac, user);
 			transac.commit();
-			response.sendRedirect("/homepage");
+			response.sendRedirect(request.getParameter("url"));
 			
 		//catch is necessary for the datastore.get() method
 		}catch (EntityNotFoundException e) {
 			e.printStackTrace();
-			response.sendRedirect("/homepage");
+			response.sendRedirect(request.getParameter("url"));
 
 		}
 		finally {

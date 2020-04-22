@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -35,8 +33,9 @@ public class ProfileServlet extends HttpServlet{
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		UserService userService = UserServiceFactory.getUserService();		
-		Key userProfile = KeyFactory.stringToKey(request.getParameter("key"));	
+		UserService userService = UserServiceFactory.getUserService();
+		String requestKey = request.getParameter("key");
+		Key userProfile = KeyFactory.stringToKey(requestKey);	
 		
 		try {
 			Entity user = datastore.get(userProfile);

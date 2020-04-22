@@ -36,7 +36,7 @@
 %>
 
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,11 +71,11 @@
 					aria-label="Username" aria-describedby="basic-addon1">
 			</div>
 		</form>
-		<div class="nav navbar-nav navbar-right">
-			<a class="like" href=""><img class="icon-nav"
-				src="/resources/img/heart.png"></a> <a class="profile"
-				href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img
-				class="icon-nav" src="/resources/img/user.png"></a>
+		<div class="nav navbar-nav navbar-right justify-content-end">
+			<div class="nav navbar-nav navbar-right">
+	 	  		<a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a>
+ 	 	  		<a class="profile" href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
+	  		</div>
 		</div>
 	</nav>
 
@@ -147,8 +147,16 @@
 			<!--  members card / to follow and unfollow -->
 			<div class="col-4">
 				<div class="card ">
+					<div class="card-header">
+						<div class="row">
+							<div class="col-8"><h5 class="card-title">Members</h5></div>
+							<div class="col-4 member-col"><a href="/members" class="members" role="button">See all <i class="fa fa-plus-square"></i>
+							</a></div>
+						</div>
+ 					
+						
+  				 	</div>
 					<div class="card-body">
-						<h5 class="card-title">Members</h5>
 						<div class="scrollable">
 							<!-- 	 For each users, we display Firstname and Lastname  -->
 							<c:forEach items="${users}" var="u">
@@ -167,19 +175,19 @@
 												<c:choose>
 													<%-- 			     			If he is friend with that person --%>
 													<c:when test="${friends.contains(u)}">
-														<a href="/unfollow?key=${KeyFactory.keyToString(u.key)}"
+														<a href="/unfollow?key=${KeyFactory.keyToString(u.key)}&url=/homepage"
 															class="btn btn-danger btn-sm">Unfollow</a>
 													</c:when>
 													<%-- 							    else    --%>
 													<c:otherwise>
-														<a href="/follow?key=${KeyFactory.keyToString(u.key)}"
+														<a href="/follow?key=${KeyFactory.keyToString(u.key)}&url=/homepage"
 															class="btn btn-primary btn-sm">Follow</a>
 													</c:otherwise>
 												</c:choose>
 											</c:when>
 											<%-- 				    else     --%>
 											<c:otherwise>
-												<a href="/follow?key=${KeyFactory.keyToString(u.key)}"
+												<a href="/follow?key=${KeyFactory.keyToString(u.key)}&url=/homepage"
 													class="btn btn-primary btn-sm">Follow</a>
 											</c:otherwise>
 										</c:choose>
