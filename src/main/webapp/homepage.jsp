@@ -144,14 +144,10 @@
 						</div>
 					</div>
 				</c:forEach>
-				<%
-					ArrayList<String> posts =  (ArrayList<String>)  request.getAttribute("posts");	
-					if(posts.size() > 0){
-				%>
+
 					<div class="seeMore">
 						<a href="/homepage?last=${last}" class="btn btn-outline-secondary btn-sm">See more</a>
 					</div>
-				<% 	} %>
 				
 			</div>
 

@@ -56,8 +56,7 @@
 
 /* here to change image format on cards */
 .card-img-top{
-	width: 240px;
-	height: 240px;
+	height: 600px;
 }
 
 .list-members{
