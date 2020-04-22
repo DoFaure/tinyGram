@@ -1,12 +1,10 @@
 package tinyGram;
 
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -29,7 +27,6 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.auth.ServiceAccountSigner;
 
 
 @WebServlet(name = "Homepage", urlPatterns = { "/homepage" })
@@ -40,7 +37,6 @@ public class ShowFriendsPosts extends HttpServlet{
 	
 		UserService userService = UserServiceFactory.getUserService();		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();		
-		//response.getWriter().print(userService.getCurrentUser().);
 		
 		//Create User if it's first connection
 		Principal newUser = request.getUserPrincipal();	
@@ -112,7 +108,8 @@ public class ShowFriendsPosts extends HttpServlet{
 					List<Entity> resultPosts = null;
 					Collections.sort(friendsPostsKeys);
 					try {
-						System.out.println(request.getParameter("last"));
+						//System.out.println(request.getParameter("last"));
+						request.setAttribute("currentLast", request.getParameter("last"));
 						Key keyLastUser = KeyFactory.createKey("Post", request.getParameter("last"));
 						Entity last = datastore.get(keyLastUser);
 						Filter propertyPostsFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN, friendsPostsKeys);
@@ -130,10 +127,11 @@ public class ShowFriendsPosts extends HttpServlet{
 					
 					//Sort by Collections.sort because App Engine has limited Parallel Queries 
 					//Collections.sort(resultPosts, (y, x) -> ((Date)x.getProperty("date")).compareTo((Date)y.getProperty("date")));
+					
 					if (resultPosts.size() > 0) {
 						request.setAttribute("last", resultPosts.get(resultPosts.size() - 1).getKey().toString().split("\"")[1]);
 					}
-					System.out.println(resultPosts.toString());
+					//System.out.println(resultPosts.toString());
 					request.setAttribute("posts", resultPosts);
 				}
 				

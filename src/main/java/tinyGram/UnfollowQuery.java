@@ -28,6 +28,9 @@ public class UnfollowQuery extends HttpServlet {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		Key userToUnfollowKey = KeyFactory.stringToKey(request.getParameter("key"));
 		Key userKey = KeyFactory.createKey("User", request.getUserPrincipal().getName());
+		request.setAttribute("last", request.getParameter("last"));
+		String url = request.getParameter("url");
+
 		
 		Transaction transac = datastore.beginTransaction();
 		try {	
@@ -37,12 +40,39 @@ public class UnfollowQuery extends HttpServlet {
 			user.setProperty("friends", friends);
 			datastore.put(transac, user);
 			transac.commit();
-			response.sendRedirect(request.getParameter("url"));
+			
+			
+			if(url.compareTo("/members") == 0) {
+				if(request.getParameter("cursor").compareTo("null") == 0) {
+					response.sendRedirect(request.getParameter("url"));
+				}else {
+					response.sendRedirect(request.getParameter("url")+"?cursor="+request.getParameter("cursor"));
+				}
+			}else {
+				if(request.getParameter("cursor").length() == 0) {
+					response.sendRedirect(request.getParameter("url"));
+				}else {
+					response.sendRedirect(request.getParameter("url")+"?last="+request.getParameter("cursor"));
+				}
+			}
 			
 		//catch is necessary for the datastore.get() method
 		}catch (EntityNotFoundException e) {
 			e.printStackTrace();
-			response.sendRedirect(request.getParameter("url"));
+			
+			if(url.compareTo("/members") == 0) {
+				if(request.getParameter("cursor").compareTo("null") == 0) {
+					response.sendRedirect(request.getParameter("url"));
+				}else {
+					response.sendRedirect(request.getParameter("url")+"?cursor="+request.getParameter("cursor"));
+				}
+			}else {
+				if(request.getParameter("cursor").length() == 0) {
+					response.sendRedirect(request.getParameter("url"));
+				}else {
+					response.sendRedirect(request.getParameter("url")+"?last="+request.getParameter("cursor"));
+				}
+			}
 
 		}
 		finally {

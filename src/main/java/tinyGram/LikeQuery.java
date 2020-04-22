@@ -43,12 +43,12 @@ public class LikeQuery extends HttpServlet{
 				post.setProperty("likes", likes);
 				datastore.put(transac,post);		
 				transac.commit();
-				response.sendRedirect("/homepage");
+				response.sendRedirect(request.getParameter("url"));
 				
 			//catch is necessary for the datastore.get() method
 			} catch (EntityNotFoundException e) {
 				e.printStackTrace();
-				response.sendRedirect("/homepage");
+				response.sendRedirect(request.getParameter("url"));
 
 			}
 			finally {

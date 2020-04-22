@@ -65,6 +65,10 @@ public class MembersServlet extends HttpServlet{
 	    	results.remove(principal);
 	    }
 	    
+		String cursorString = results.getCursor().toWebSafeString();
+
+		
+	    
 	    PrintWriter w = response.getWriter();
 	    w.println("<!DOCTYPE html>");
 	    w.println("<head>\n" + 
@@ -127,18 +131,18 @@ public class MembersServlet extends HttpServlet{
 	      		"									</div>\n" + 
 	      		"									<div class=\"follow\">\n" +
 	      		"");
-	      
+
 		ArrayList<String> friends = (ArrayList<String>) principal.getProperty("friends");   
 		   if(friends != null) {
 			   if(friends.contains(entity.getKey().getName())) {
-				   w.println("<a href=\"/unfollow?url="+request.getRequestURI()+"&key="+KeyFactory.keyToString(entity.getKey()) +"\"\n" + 
+				   w.println("<a href=\"/unfollow?url="+request.getRequestURI()+"&key="+KeyFactory.keyToString(entity.getKey())+"&cursor="+request.getParameter("cursor")+"\"\n" + 
 				   		"class=\"btn btn-danger btn-sm\">Unfollow</a>");
 			   }else{
-				   w.println("<a href=\"/follow?url="+request.getRequestURI()+"&key="+KeyFactory.keyToString(entity.getKey()) +"\"\n" + 
+				   w.println("<a href=\"/follow?url="+request.getRequestURI()+"&key="+KeyFactory.keyToString(entity.getKey())+"&cursor="+request.getParameter("cursor")+"\"\n" + 
 				   		"class=\"btn btn-primary btn-sm\">Follow</a");
 			   }
 		   }else{
-			   		w.println("<a href=\"/follow?url="+request.getRequestURI()+"&key="+KeyFactory.keyToString(entity.getKey())+"\"\n" + 
+			   		w.println("<a href=\"/follow?url="+request.getRequestURI()+"&key="+KeyFactory.keyToString(entity.getKey())+"&cursor="+request.getParameter("cursor")+"\"\n" + 
 			   				"class=\"btn btn-primary btn-sm\">Follow</a>");
 		   }
 		   
@@ -146,8 +150,6 @@ public class MembersServlet extends HttpServlet{
 	      		"</div>");
 	    }
     
-	    String cursorString = results.getCursor().toWebSafeString();
-
 	    // This servlet lives at '/people'.
 	    w.println("<div class=\"next\">"
 	    		+ "<a href='/members?cursor=" + cursorString + "'>Next page</a>"

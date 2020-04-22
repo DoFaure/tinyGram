@@ -84,12 +84,14 @@
 		<div class="row">
 			<div class="col-8">
 				<c:forEach items="${posts}" var="post">
+<!-- 				store useful values  -->
 					<c:set var="postUser" value="${post.properties.user}"
 						scope="request" />
 					<c:set var="postDate" value="${post.properties.date}"
 						scope="request" />
 					<c:set var="postLikes" value="${post.properties.likes}"
 						scope="request" />
+<!-- ---------------------------------- -->
 					<div class="margin-top flex">
 						<div class="card">
 							<div class="card-header d-flex align-items-center">
@@ -120,14 +122,14 @@
 									<%
 										if (likedBy.contains(request.getUserPrincipal().getName())) {
 									%>
-									<a href="/unlike?key=${KeyFactory.keyToString(post.key)}"
+									<a href="/unlike?key=${KeyFactory.keyToString(post.key)}&url=${request.getRequestURI()}"
 										class="icon-block"> <i class="fa fa-heart"
 										style="color: #FF0000"></i>
 									</a>
 									<%
 										} else {
 									%>
-									<a href="/like?key=${KeyFactory.keyToString(post.key)}"
+									<a href="/like?key=${KeyFactory.keyToString(post.key)}&url=${request.getRequestURI()}"
 										class="icon-block"> <i class="fa fa-heart-o"
 										style="color: #FF0000"></i>
 									</a>
@@ -142,7 +144,15 @@
 						</div>
 					</div>
 				</c:forEach>
-				<a href="/homepage?last=${last}" class="btn btn-danger btn-sm">See more</a>
+				<%
+					ArrayList<String> posts =  (ArrayList<String>)  request.getAttribute("posts");	
+					if(posts.size() > 0){
+				%>
+					<div class="seeMore">
+						<a href="/homepage?last=${last}" class="btn btn-outline-secondary btn-sm">See more</a>
+					</div>
+				<% 	} %>
+				
 			</div>
 
 			<!--  members card / to follow and unfollow -->
@@ -176,19 +186,19 @@
 												<c:choose>
 													<%-- 			     			If he is friend with that person --%>
 													<c:when test="${friends.contains(u)}">
-														<a href="/unfollow?key=${KeyFactory.keyToString(u.key)}&url=/homepage"
+														<a href="/unfollow?key=${KeyFactory.keyToString(u.key)}&url=/homepage&cursor=${currentLast}"
 															class="btn btn-danger btn-sm">Unfollow</a>
 													</c:when>
 													<%-- 							    else    --%>
 													<c:otherwise>
-														<a href="/follow?key=${KeyFactory.keyToString(u.key)}&url=/homepage"
+														<a href="/follow?key=${KeyFactory.keyToString(u.key)}&url=/homepage&cursor=${currentLast}"
 															class="btn btn-primary btn-sm">Follow</a>
 													</c:otherwise>
 												</c:choose>
 											</c:when>
 											<%-- 				    else     --%>
 											<c:otherwise>
-												<a href="/follow?key=${KeyFactory.keyToString(u.key)}&url=/homepage"
+												<a href="/follow?key=${KeyFactory.keyToString(u.key)}&url=/homepage&cursor=${currentLast}"
 													class="btn btn-primary btn-sm">Follow</a>
 											</c:otherwise>
 										</c:choose>
