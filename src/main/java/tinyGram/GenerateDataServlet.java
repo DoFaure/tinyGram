@@ -75,7 +75,7 @@ public class GenerateDataServlet extends HttpServlet{
 				Date date = Date.from(instant);
 				
 				post.setProperty("date", date);
-				post.setProperty("URL", "http://imagePostTinyGram"+j+".com");
+				post.setProperty("URL", "https://dummyimage.com/600x600/000/fff&text="+date);
 				
 				//Create likes for Posts
 				HashSet<String> likes = new HashSet<String>();

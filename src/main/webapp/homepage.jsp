@@ -142,6 +142,7 @@
 						</div>
 					</div>
 				</c:forEach>
+				<a href="/homepage?last=${last}" class="btn btn-danger btn-sm">See more</a>
 			</div>
 
 			<!--  members card / to follow and unfollow -->

@@ -23,6 +23,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
@@ -108,19 +109,35 @@ public class ShowFriendsPosts extends HttpServlet{
 					friendsPostsKeys.add(KeyFactory.createKey("Post", post));
 				}
 				if(friendsPostsKeys.size()>0) {
-					Filter propertyPostsFilter =   new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN,friendsPostsKeys);
-					Query qp = new Query("Post").setFilter(propertyPostsFilter);
-					PreparedQuery pqp = datastore.prepare(qp);
-					List<Entity> resultPosts = pqp.asList(FetchOptions.Builder.withDefaults());
+					List<Entity> resultPosts = null;
+					Collections.sort(friendsPostsKeys);
+					try {
+						System.out.println(request.getParameter("last"));
+						Key keyLastUser = KeyFactory.createKey("Post", request.getParameter("last"));
+						Entity last = datastore.get(keyLastUser);
+						Filter propertyPostsFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN, friendsPostsKeys);
+						Filter propertyPostsFilterPaginate = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN, last.getKey());
+						Query qp = new Query("Post").setFilter(CompositeFilterOperator.and(propertyPostsFilter, propertyPostsFilterPaginate));
+						PreparedQuery pqp = datastore.prepare(qp);
+						resultPosts = pqp.asList(FetchOptions.Builder.withLimit(5));
+					} catch (EntityNotFoundException | java.lang.IllegalArgumentException ex) {
+						Filter propertyPostsFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.IN, friendsPostsKeys);
+						Query qp = new Query("Post").setFilter(propertyPostsFilter);
+						PreparedQuery pqp = datastore.prepare(qp);
+						resultPosts = pqp.asList(FetchOptions.Builder.withLimit(5));
+					}
 					
 					
 					//Sort by Collections.sort because App Engine has limited Parallel Queries 
-				//	Collections.sort(resultPosts, (y, x) -> ((Date)x.getProperty("date")).compareTo((Date)y.getProperty("date")));
+					//Collections.sort(resultPosts, (y, x) -> ((Date)x.getProperty("date")).compareTo((Date)y.getProperty("date")));
+					if (resultPosts.size() > 0) {
+						request.setAttribute("last", resultPosts.get(resultPosts.size() - 1).getKey().toString().split("\"")[1]);
+					}
+					System.out.println(resultPosts.toString());
 					request.setAttribute("posts", resultPosts);
 				}
 				
-			}	
-			
+			}
 		}
 		
 		
