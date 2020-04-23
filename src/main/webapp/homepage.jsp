@@ -98,7 +98,7 @@ var Posts = {
 		    console.log("resquest")
 	        return m.request({
 	            method: "GET",
-	            url: "_ah/api/tinyGramApi/v1/posts"})
+	            url: "_ah/api/tinyGramApi/v1/users/"+me+"/receive"})
 	        .then(function(result) {
 	        	Posts.list=result.items
 	        	console.log("got:",result)
