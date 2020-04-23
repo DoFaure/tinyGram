@@ -157,9 +157,12 @@ public class TinyGramEndpoint {
 	    QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);		
 		for(Entity post : results) {
 			ArrayList<String> friends = (ArrayList<String>) post.getProperty("friends");
-			if(!friends.contains(id)) {
-				results.remove(post);
+			if(friends != null) {
+				if(!friends.contains(id)) {
+					results.remove(post);
+				}
 			}
+		
 		}
 		   
 	    if (cursorString != null) {
