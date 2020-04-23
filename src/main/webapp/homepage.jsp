@@ -50,10 +50,13 @@
 <link type="text/css" rel="stylesheet"
 	href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="/bootstrap/js/bootstrap.min.js"></script>
-<script src="/bootstrap/js/bootstrap.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- mithril import -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+<script src="https://unpkg.com/mithril/mithril.js"></script>
+<!-- -------------- -->
 
 </head>
 <body>
@@ -73,8 +76,8 @@
 		</form>
 		<div class="nav navbar-nav navbar-right justify-content-end">
 			<div class="nav navbar-nav navbar-right">
-	 	  		<a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  		<a class="profile" href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
+	 	  		<a class="like" href="/followers.jsp"><img class="icon-nav" src="/resources/img/heart.png"></a>
+ 	 	  		<a class="profile" href="/profile.jsp?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  		</div>
 		</div>
 	</nav>
@@ -82,72 +85,143 @@
 	<!--  all friend's posts ordered by date -->
 	<div class="container">
 		<div class="row">
-			<div class="col-8">
-				<c:forEach items="${posts}" var="post">
-<!-- 				store useful values  -->
-					<c:set var="postUser" value="${post.properties.user}"
-						scope="request" />
-					<c:set var="postDate" value="${post.properties.date}"
-						scope="request" />
-					<c:set var="postLikes" value="${post.properties.likes}"
-						scope="request" />
-<!-- ---------------------------------- -->
-					<div class="margin-top flex">
-						<div class="card">
-							<div class="card-header d-flex align-items-center">
-								<h5>
-									<%=datastore.get(KeyFactory.stringToKey((String) request.getAttribute("postUser")))
-						.getProperty("firstName")%>
-									<%=datastore.get(KeyFactory.stringToKey((String) request.getAttribute("postUser")))
-						.getProperty("lastName")%>
-								</h5>
-								<div class="col-sm-5 ml-auto">
-									<h6 class="date">
-										<%=formatDate.format(request.getAttribute("postDate"))%>
-									</h6>
-								</div>
-							</div>
-							<img class="card-img-top" src="${post.properties.URL}"
-								alt="url-image-post : <c:out value=" ${post.properties.URL}"/>">
-							<div class="card-body">
-								<p class="card-text">
-									<c:out value="${post.properties.body}" />
-								</p>
-							</div>
-							<div class="card-footer text-muted">
-								<%
-									ArrayList<String> likedBy = (ArrayList<String>) request.getAttribute("postLikes");
-								%>
-								<p class="card-text">
-									<%
-										if (likedBy.contains(request.getUserPrincipal().getName())) {
-									%>
-									<a href="/unlike?key=${KeyFactory.keyToString(post.key)}&url=${request.getRequestURI()}"
-										class="icon-block"> <i class="fa fa-heart"
-										style="color: #FF0000"></i>
-									</a>
-									<%
-										} else {
-									%>
-									<a href="/like?key=${KeyFactory.keyToString(post.key)}&url=${request.getRequestURI()}"
-										class="icon-block"> <i class="fa fa-heart-o"
-										style="color: #FF0000"></i>
-									</a>
-									<%
-										}
-									%>
-									<%=likedBy.size()%>
-									likes
+			<div class="col-8" id="test">
 
-								</p>
-							</div>
-						</div>
-					</div>
-				</c:forEach>
+<script>
 
-					<div class="seeMore">
-						<a href="/homepage?last=${last}" class="btn btn-outline-secondary btn-sm">See more</a>
-					</div>
+var me = "${KeyFactory.keyToString(entity.key)}";
+
+var Posts = {
+		list: [],
+	    nextToken: "",
+	    loadList: function() {
+		    console.log("resquest")
+	        return m.request({
+	            method: "GET",
+	            url: "_ah/api/tinyGramApi/v1/posts"})
+	        .then(function(result) {
+	        	Posts.list=result.items
+	        	console.log("got:",result)
+// 	            if ('nextPageToken' in result) {
+// 		        	MyPost.nextToken= result.nextPageToken
+// 	            } else {
+// 	            	MyPost.nextToken=""
+	            })
+	    }
+	}
+
+var PostView = {
+		  oninit: Posts.loadList,
+		  view: function() {
+		   	return m('div', [
+			  m('div',{class:'subtitle'},"My Posts"),
+			  m('table', {class:'table is-striped',"table":"is-striped"},[
+			    m('tr', [
+				  m('th', {width:"50px"}, "like"),
+				  m('th', {width:"50px"}, "del"),
+			      m('th', {width:"50px"}, "Bodys"),
+			      m('th', {width:"50px"}, "Urls"),
+			      m('th', {width:"50px"}, "Like"),
+			    ]),
+			    Posts.list.map(function(item) {
+				    console.log("map")
+			      return m("tr", [
+		            m("td", m("button", {onclick: function(e) {
+						console.log("like:"+item.key.id)
+		                 }},"like")),
+		                 m("td", m("button", {onclick: function(e) {
+		     				console.log("del:"+item.key.id)
+		                 }},"del")),
+			        m('td', m('label', item.properties.body)),
+			        m('td', m('img', {class: 'is-rounded', 'src': item.properties.url})),
+			        m('td', m('label', item.properties.likes)),
+			      ])
+			    }),
+			   ])
+			 ])
+		  }
+		}
+
+var Hello = {
+		   view: function() {
+			   console.log("hi")
+		   	return m('div', {class:'container'}, [
+		           m("h1", {class: 'title'}, 'The TinyGram Post'),
+		           m('div',{class: 'tile is-ancestor'},[
+		        	   m("div", {class: 'tile'}, m('div',{class:'tile is-child box'},m(PostView))),
+		           ])
+		       ])
+		   }
+		}
+
+
+m.mount(document.getElementById("test"), Hello)	
+</script>
+<%-- 				<c:forEach items="${posts}" var="post"> --%>
+<!-- <!-- 				store useful values  --> 
+<%-- 					<c:set var="postUser" value="${post.properties.user}" --%>
+<%-- 						scope="request" /> --%>
+<%-- 					<c:set var="postDate" value="${post.properties.date}" --%>
+<%-- 						scope="request" /> --%>
+<%-- 					<c:set var="postLikes" value="${post.properties.likes}" --%>
+<%-- 						scope="request" /> --%>
+<!-- <!-- ---------------------------------- --> 
+<!-- 					<div class="margin-top flex"> -->
+<!-- 						<div class="card"> -->
+<!-- 							<div class="card-header d-flex align-items-center"> -->
+<!-- 								<h5> -->
+<%-- 									<%=datastore.get(KeyFactory.stringToKey((String) request.getAttribute("postUser"))) --%>
+<%-- 						.getProperty("firstName")%> --%>
+<%-- 									<%=datastore.get(KeyFactory.stringToKey((String) request.getAttribute("postUser"))) --%>
+<%-- 						.getProperty("lastName")%> --%>
+<!-- 								</h5> -->
+<!-- 								<div class="col-sm-5 ml-auto"> -->
+<!-- 									<h6 class="date"> -->
+<%-- 										<%=formatDate.format(request.getAttribute("postDate"))%> --%>
+<!-- 									</h6> -->
+<!-- 								</div> -->
+<!-- 							</div> -->
+<%-- 							<img class="card-img-top" src="${post.properties.URL}" --%>
+<%-- 								alt="url-image-post : <c:out value=" ${post.properties.URL}"/>"> --%>
+<!-- 							<div class="card-body"> -->
+<!-- 								<p class="card-text"> -->
+<%-- 									<c:out value="${post.properties.body}" /> --%>
+<!-- 								</p> -->
+<!-- 							</div> -->
+<!-- 							<div class="card-footer text-muted"> -->
+<%-- 								<% --%>
+<!--  									ArrayList<String> likedBy = (ArrayList<String>) request.getAttribute("postLikes"); -->
+<%-- 								%> --%>
+<!-- 								<p class="card-text"> -->
+<%-- 									<% --%>
+<!--  										if (likedBy.contains(request.getUserPrincipal().getName())) { -->
+<%-- 									%> --%>
+<%-- 									<a href="/unlike?key=${KeyFactory.keyToString(post.key)}&url=${request.getRequestURI()}" --%>
+<!-- 										class="icon-block"> <i class="fa fa-heart" -->
+<!-- 										style="color: #FF0000"></i> -->
+<!-- 									</a> -->
+<%-- 									<% --%>
+<!--  										} else { -->
+<%-- 									%> --%>
+<%-- 									<a href="/like?key=${KeyFactory.keyToString(post.key)}&url=${request.getRequestURI()}" --%>
+<!-- 										class="icon-block"> <i class="fa fa-heart-o" -->
+<!-- 										style="color: #FF0000"></i> -->
+<!-- 									</a> -->
+<%-- 									<% --%>
+<!--  										} -->
+<%-- 									%> --%>
+<%-- 									<%=likedBy.size()%> --%>
+<!-- 									likes -->
+
+<!-- 								</p> -->
+<!-- 							</div> -->
+<!-- 						</div> -->
+<!-- 					</div> -->
+<%-- 				</c:forEach> --%>
+
+<!-- 					<div class="seeMore"> -->
+<%-- 						<a href="/homepage?last=${last}" class="btn btn-outline-secondary btn-sm">See more</a> --%>
+<!-- 					</div> -->
 				
 			</div>
 
@@ -157,7 +231,7 @@
 					<div class="card-header">
 						<div class="row">
 							<div class="col-8"><h5 class="card-title">Members</h5></div>
-							<div class="col-4 member-col"><a href="/members" class="members" role="button">See all <i class="fa fa-plus-square"></i>
+							<div class="col-8 member-col"><a href="/members" class="members" role="button">See all <i class="fa fa-plus-square"></i>
 							</a></div>
 						</div>
  					
