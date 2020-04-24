@@ -133,13 +133,24 @@ public class TinyGramEndpoint {
 	 * @return List<Entity>User 
 	 */
 	@ApiMethod(name = "user_posts", path="get/users/{id}/posts", httpMethod = HttpMethod.GET)
-	public List<Entity> userPosts(@Named("id") String id){
+	public CollectionResponse<Entity> userPosts(@Named("id") String id,@Nullable @Named("next") String cursorString){
 		
-		Query q = new Query("Post").setFilter(new FilterPredicate("owner", FilterOperator.EQUAL, KeyFactory.stringToKey(id)));
+		Query q = new Query("Post").setFilter(new FilterPredicate("owner", FilterOperator.EQUAL, id)).addSort("date", SortDirection.DESCENDING);
 		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> posts = pq.asList(FetchOptions.Builder.withDefaults());
+		
+	    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(5);
+		
+	    QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+	    
+	    if (cursorString != null) {
+		    	fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
+		}
+		
 
-		return posts;
+		cursorString = results.getCursor().toWebSafeString();
+		
+		return CollectionResponse.<Entity>builder().setItems(results).setNextPageToken(cursorString).build();
+
 		
 	}
 	

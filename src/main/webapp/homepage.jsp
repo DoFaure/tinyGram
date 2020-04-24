@@ -1,15 +1,6 @@
 <%@ page import="com.google.appengine.api.users.UserServiceFactory"%>
-<%@ page import="java.security.Principal"%>
-<%@ page import="java.util.ArrayList"%>
-<%@ page import="java.text.SimpleDateFormat"%>
-<%@ page import="com.google.appengine.api.datastore.DatastoreService"%>
 <%@ page import="com.google.appengine.api.datastore.Key"%>
-<%@ page
-	import="com.google.appengine.api.datastore.DatastoreServiceFactory"%>
-<%@ page import="com.google.appengine.api.datastore.Entity"%>
 <%@ page import="com.google.appengine.api.datastore.KeyFactory"%>
-<%@ page
-	import="com.google.appengine.api.datastore.EntityNotFoundException"%>
 <%@ page import="com.google.appengine.api.users.UserService"%>
 
 
@@ -17,29 +8,7 @@
 
 
 <%!UserService userService = UserServiceFactory.getUserService();%>
-<%!DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();%>
-<%
-    if (!userService.isUserLoggedIn()) {
-        response.sendRedirect("/login");
-    }
 
-    //Get connected user informations
-    Principal newUser = request.getUserPrincipal();
-    Key keyNewUser = KeyFactory.createKey("User", request.getUserPrincipal().getName());
-    Entity e;
-    try {
-        e = datastore.get(keyNewUser);
-        pageContext.setAttribute("entity", e);
-    } catch (EntityNotFoundException ex) {
-        // TODO Auto-generated catch block
-        e = new Entity("User", request.getUserPrincipal().getName());
-        e.setProperty("mail", userService.getCurrentUser().getEmail());
-        e.setProperty("name", userService.getCurrentUser().getNickname());
-        datastore.put(e);
-        e = datastore.get(e.getKey());
-        pageContext.setAttribute("entity", e);
-    }
-%>
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -82,7 +51,7 @@
 		<div class="nav navbar-nav navbar-right justify-content-end">
 			<div class="nav navbar-nav navbar-right">
 	 	  		<a class="like" href="/followers.jsp"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  		<a class="profile" href="/profile.jsp?key="><img class="icon-nav" src="/resources/img/user.png"></a>
+ 	 	  		<a class="profile" href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  		</div>
 		</div>
 	</nav>
@@ -176,10 +145,10 @@ var PostView = {
 						]),
 						m('div', {class: 'card-footer text-muted'}, [
 							m('p', {class: 'card-text'}, [
-								m('a', {href: 'link_like', class: 'icon-block'}, [
-									Object.size(item.properties.likes)&nbsp; , 
+								m('a', {href: 'link_like', class: 'icon-block'}, [ 
 									m('i', {class: 'fa fa-heart', style: 'color: #FF0000'}, "" ), 
-								])
+								]),
+								" "+Object.size(item.properties.likes)+" likes" ,
 							])
 						])
 					])
@@ -206,7 +175,7 @@ var SuggestionView = {
 		  						m('h5', {class: 'card-title'}, "Suggestion")
 		  					]),
 		  					m('div', {class: 'col-4 member-col'}, [
-		  						m('a', {href: 'lien', class: '', role: 'button'}, "See all")
+		  						m('a', {href: '/members', class: '', role: 'button'}, "See all")
 		  					])
 		  				])
 		  			]),
