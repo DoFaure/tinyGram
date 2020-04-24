@@ -18,21 +18,27 @@
 
 <%!UserService userService = UserServiceFactory.getUserService();%>
 <%!DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();%>
-<%!SimpleDateFormat formatDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");%>
 <%
-	if (!userService.isUserLoggedIn()) {
-		response.sendRedirect("/login");
-	} else {
-		//Get connected user informations
-		Entity e;
-		try {
-			e = datastore.get(KeyFactory.createKey("User", request.getUserPrincipal().getName()));
-			pageContext.setAttribute("entity", e);
-		} catch (EntityNotFoundException ex) {
-			// TODO Auto-generated catch block
-			ex.printStackTrace();
-		}
-	}
+    if (!userService.isUserLoggedIn()) {
+        response.sendRedirect("/login");
+    }
+
+    //Get connected user informations
+    Principal newUser = request.getUserPrincipal();
+    Key keyNewUser = KeyFactory.createKey("User", request.getUserPrincipal().getName());
+    Entity e;
+    try {
+        e = datastore.get(keyNewUser);
+        pageContext.setAttribute("entity", e);
+    } catch (EntityNotFoundException ex) {
+        // TODO Auto-generated catch block
+        e = new Entity("User", request.getUserPrincipal().getName());
+        e.setProperty("mail", userService.getCurrentUser().getEmail());
+        e.setProperty("name", userService.getCurrentUser().getNickname());
+        datastore.put(e);
+        e = datastore.get(e.getKey());
+        pageContext.setAttribute("entity", e);
+    }
 %>
 
 <!DOCTYPE html>
@@ -53,7 +59,6 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <!-- mithril import -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
 <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 <script src="https://unpkg.com/mithril/mithril.js"></script>
 <!-- -------------- -->
@@ -77,214 +82,171 @@
 		<div class="nav navbar-nav navbar-right justify-content-end">
 			<div class="nav navbar-nav navbar-right">
 	 	  		<a class="like" href="/followers.jsp"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  		<a class="profile" href="/profile.jsp?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
+ 	 	  		<a class="profile" href="/profile.jsp?key="><img class="icon-nav" src="/resources/img/user.png"></a>
 	  		</div>
 		</div>
 	</nav>
+	<div class="container" id="logout">
+		<div class="row signout">
+			<div class="col-8"></div>
+			<div class="col-4 signout">
+				<a href='<%=userService.createLogoutURL("/../index.jsp")%>'
+					class="btn btn-danger btn-sm">SIGN OUT</a>
+			</div>
+		</div>	
+	</div>
 
-	<!--  all friend's posts ordered by date -->
-	<div class="container">
-		<div class="row">
-			<div class="col-8" id="test">
+	<div id="script"></div>
+	
 
 <script>
 
-var me = "${KeyFactory.keyToString(entity.key)}";
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
 
-var Posts = {
+var Posts = {	
 		list: [],
 	    nextToken: "",
 	    loadList: function() {
-		    console.log("resquest")
+		    console.log("request")
 	        return m.request({
 	            method: "GET",
-	            url: "_ah/api/tinyGramApi/v1/users/"+me+"/receive"})
+	            url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive"})
 	        .then(function(result) {
-	        	Posts.list=result.items
+	        	Posts.list=result.items;
 	        	console.log("got:",result)
-// 	            if ('nextPageToken' in result) {
-// 		        	MyPost.nextToken= result.nextPageToken
-// 	            } else {
-// 	            	MyPost.nextToken=""
-	            })
+ 	            if ('nextPageToken' in result) {
+ 		        	Posts.nextToken= result.nextPageToken
+ 	            } else {
+ 	            	Posts.nextToken=""
+ 	            }});
+	    },
+	    next: function() {
+	        return m.request({
+	            method: "GET",
+	            url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive?next="+Posts.nextToken})
+	        .then(function(result) {
+	        	console.log("got:",result)
+	        	result.items.map(function(item){Posts.list.push(item)})
+	            if ('nextPageToken' in result) {
+		        	Posts.nextToken= result.nextPageToken
+	            } else {
+	            	Posts.nextToken=""
+	            }})
 	    }
 	}
 
+var Users = {
+		list: [],
+	    nextToken: "",
+	    loadList: function() {
+		    console.log("request")
+	        return m.request({
+	            method: "GET",
+	            url: "_ah/api/tinyGramApi/v1/get/users"})
+	        .then(function(result) {
+	        	Users.list=result.items;
+	        	console.log("got:",result)
+	    	})
+	    }
+}
+
 var PostView = {
-		  oninit: Posts.loadList,
-		  view: function() {
-		   	return m('div', [
-			  m('div',{class:'subtitle'},"My Posts"),
-			  m('table', {class:'table is-striped',"table":"is-striped"},[
-			    m('tr', [
-				  m('th', {width:"50px"}, "like"),
-				  m('th', {width:"50px"}, "del"),
-			      m('th', {width:"50px"}, "Bodys"),
-			      m('th', {width:"50px"}, "Urls"),
-			      m('th', {width:"50px"}, "Like"),
-			    ]),
-			    Posts.list.map(function(item) {
-				    console.log("map")
-			      return m("tr", [
-		            m("td", m("button", {onclick: function(e) {
-						console.log("like:"+item.key.id)
-		                 }},"like")),
-		                 m("td", m("button", {onclick: function(e) {
-		     				console.log("del:"+item.key.id)
-		                 }},"del")),
-			        m('td', m('label', item.properties.body)),
-			        m('td', m('img', {class: 'is-rounded', 'src': item.properties.url})),
-			        m('td', m('label', item.properties.likes)),
-			      ])
-			    }),
-			   ])
-			 ])
-		  }
-		}
+	 oninit: Posts.loadList(),
+	 view: function() {
+		return m('div', [
+			Posts.list.map(function(item) {
+				return m('div', {class: 'margin-top flex'}, [
+					m('div', {class: 'card'}, [
+						m('div', {class: 'card-header d-flex align-items-center'}, [
+// 							Need to find a solution to get the User mame by his STRING KEY
+// 							m('h5',{class: ''}, item.properties.owner), 
+							m('div', {class: 'col-sm-5 ml-auto'}, [
+								m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
+							])
+						]),
+						m('img',{class: 'card-img-top', 'src': item.properties.URL}),
+						m('div', {class: 'card-body'}, [
+							m('p', {class: ''}, item.properties.body)
+						]),
+						m('div', {class: 'card-footer text-muted'}, [
+							m('p', {class: 'card-text'}, [
+								m('a', {href: 'link_like', class: 'icon-block'}, [
+									Object.size(item.properties.likes)&nbsp; , 
+									m('i', {class: 'fa fa-heart', style: 'color: #FF0000'}, "" ), 
+								])
+							])
+						])
+					])
+				]);
+			}),
+			m('div', {class: 'seeMore'}, [
+				  m('button',{
+				      class: 'btn btn-outline-secondary btn-sm is-link',
+				      onclick: function(e) {Posts.next()}
+				      },
+				  "Next"),
+			])
+		])
+	 }
+}
 
-var Hello = {
-		   view: function() {
-			   console.log("hi")
-		   	return m('div', {class:'container'}, [
-		           m("h1", {class: 'title'}, 'The TinyGram Post'),
-		           m('div',{class: 'tile is-ancestor'},[
-		        	   m("div", {class: 'tile'}, m('div',{class:'tile is-child box'},m(PostView))),
-		           ])
-		       ])
-		   }
-		}
+var SuggestionView = {
+		 oninit: Users.loadList(),
+		 view: function() {
+		  	return m('div', {class: 'card'}, [
+		  			m('div', {class: 'card-header'}, [
+		  				m('div', {class: 'row'}, [
+		  					m('div', {class: 'col-8'}, [
+		  						m('h5', {class: 'card-title'}, "Suggestion")
+		  					]),
+		  					m('div', {class: 'col-4 member-col'}, [
+		  						m('a', {href: 'lien', class: '', role: 'button'}, "See all")
+		  					])
+		  				])
+		  			]),
+		  			m('div', {class: 'card-body'}, [
+		  				m('div', {class: 'scrollable'}, [
+		  					Users.list.map(function(item) {
+		  						return m('div', {class: 'content'}, [
+		  							m('div', {class: 'identity'}, [
+		  								m('p', {class: 'card-text btn-align'}, [
+		  									m('a', {class: 'profile-link', href: 'lien'}, [
+		  										m('b', {}, item.properties.name)
+		  									])
+		  								])
+		  							]),
+		  							m('div', {class: 'follow'}, [
+		  								m('a', {class: 'btn btn-primary btn-sm', href: 'lien'}, "Follow")
+		  							])
+		  						])
+	  						})
+		  				])
+		  			])
+		  		])
+		 }
+	}
+
+var view = {
+	view: function() {
+		return m('div', {class:'container'}, [
+			m('div', {class:'row'}, [
+				m("div", {class: 'col-8'}, m(PostView)),
+		    	m("div", {class: 'col-4'}, m(SuggestionView)),
+			]) 
+	    ])
+	}
+}
+
+m.mount(document.getElementById("script"), view)
 
 
-m.mount(document.getElementById("test"), Hello)	
 </script>
-<%-- 				<c:forEach items="${posts}" var="post"> --%>
-<!-- <!-- 				store useful values  --> 
-<%-- 					<c:set var="postUser" value="${post.properties.user}" --%>
-<%-- 						scope="request" /> --%>
-<%-- 					<c:set var="postDate" value="${post.properties.date}" --%>
-<%-- 						scope="request" /> --%>
-<%-- 					<c:set var="postLikes" value="${post.properties.likes}" --%>
-<%-- 						scope="request" /> --%>
-<!-- <!-- ---------------------------------- --> 
-<!-- 					<div class="margin-top flex"> -->
-<!-- 						<div class="card"> -->
-<!-- 							<div class="card-header d-flex align-items-center"> -->
-<!-- 								<h5> -->
-<%-- 									<%=datastore.get(KeyFactory.stringToKey((String) request.getAttribute("postUser"))) --%>
-<%-- 						.getProperty("firstName")%> --%>
-<%-- 									<%=datastore.get(KeyFactory.stringToKey((String) request.getAttribute("postUser"))) --%>
-<%-- 						.getProperty("lastName")%> --%>
-<!-- 								</h5> -->
-<!-- 								<div class="col-sm-5 ml-auto"> -->
-<!-- 									<h6 class="date"> -->
-<%-- 										<%=formatDate.format(request.getAttribute("postDate"))%> --%>
-<!-- 									</h6> -->
-<!-- 								</div> -->
-<!-- 							</div> -->
-<%-- 							<img class="card-img-top" src="${post.properties.URL}" --%>
-<%-- 								alt="url-image-post : <c:out value=" ${post.properties.URL}"/>"> --%>
-<!-- 							<div class="card-body"> -->
-<!-- 								<p class="card-text"> -->
-<%-- 									<c:out value="${post.properties.body}" /> --%>
-<!-- 								</p> -->
-<!-- 							</div> -->
-<!-- 							<div class="card-footer text-muted"> -->
-<%-- 								<% --%>
-<!--  									ArrayList<String> likedBy = (ArrayList<String>) request.getAttribute("postLikes"); -->
-<%-- 								%> --%>
-<!-- 								<p class="card-text"> -->
-<%-- 									<% --%>
-<!--  										if (likedBy.contains(request.getUserPrincipal().getName())) { -->
-<%-- 									%> --%>
-<%-- 									<a href="/unlike?key=${KeyFactory.keyToString(post.key)}&url=${request.getRequestURI()}" --%>
-<!-- 										class="icon-block"> <i class="fa fa-heart" -->
-<!-- 										style="color: #FF0000"></i> -->
-<!-- 									</a> -->
-<%-- 									<% --%>
-<!--  										} else { -->
-<%-- 									%> --%>
-<%-- 									<a href="/like?key=${KeyFactory.keyToString(post.key)}&url=${request.getRequestURI()}" --%>
-<!-- 										class="icon-block"> <i class="fa fa-heart-o" -->
-<!-- 										style="color: #FF0000"></i> -->
-<!-- 									</a> -->
-<%-- 									<% --%>
-<!--  										} -->
-<%-- 									%> --%>
-<%-- 									<%=likedBy.size()%> --%>
-<!-- 									likes -->
-
-<!-- 								</p> -->
-<!-- 							</div> -->
-<!-- 						</div> -->
-<!-- 					</div> -->
-<%-- 				</c:forEach> --%>
-
-<!-- 					<div class="seeMore"> -->
-<%-- 						<a href="/homepage?last=${last}" class="btn btn-outline-secondary btn-sm">See more</a> --%>
-<!-- 					</div> -->
-				
-			</div>
-
-			<!--  members card / to follow and unfollow -->
-			<div class="col-4">
-				<div class="card ">
-					<div class="card-header">
-						<div class="row">
-							<div class="col-8"><h5 class="card-title">Members</h5></div>
-							<div class="col-8 member-col"><a href="/members" class="members" role="button">See all <i class="fa fa-plus-square"></i>
-							</a></div>
-						</div>
- 					
-						
-  				 	</div>
-					<div class="card-body">
-						<div class="scrollable">
-							<!-- 	 For each users, we display Firstname and Lastname  -->
-							<c:forEach items="${users}" var="u">
-								<div class="content">
-									<div class="identity">
-										<p class="card-text btn-align">
-											<a class="profile-link" href="/profile?key=${KeyFactory.keyToString(u.key)}">
-												<b><c:out value="${u.properties.firstName} ${u.properties.lastName}" /></b>
-											</a>
-										</p>
-									</div>
-									<div class="follow">
-										<c:choose>
-											<%-- 		     	if user has friends  --%>
-											<c:when test="${entity.properties.friends != null }">
-												<c:choose>
-													<%-- 			     			If he is friend with that person --%>
-													<c:when test="${friends.contains(u)}">
-														<a href="/unfollow?key=${KeyFactory.keyToString(u.key)}&url=/homepage&cursor=${currentLast}"
-															class="btn btn-danger btn-sm">Unfollow</a>
-													</c:when>
-													<%-- 							    else    --%>
-													<c:otherwise>
-														<a href="/follow?key=${KeyFactory.keyToString(u.key)}&url=/homepage&cursor=${currentLast}"
-															class="btn btn-primary btn-sm">Follow</a>
-													</c:otherwise>
-												</c:choose>
-											</c:when>
-											<%-- 				    else     --%>
-											<c:otherwise>
-												<a href="/follow?key=${KeyFactory.keyToString(u.key)}&url=/homepage&cursor=${currentLast}"
-													class="btn btn-primary btn-sm">Follow</a>
-											</c:otherwise>
-										</c:choose>
-									</div>
-								</div>
-							</c:forEach>
-						</div>
-					</div>
-				</div>
-				<div class="signout">
-					<a href='<%=userService.createLogoutURL("/../index.jsp")%>'
-						class="btn btn-danger btn-md">SIGN OUT</a>
-				</div>
-			</div>
-		</div>
-	</div>
 
 </body>
 </html>

@@ -1,13 +1,8 @@
 package tinyGram;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
@@ -23,7 +18,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.KeyFactory;
 
-@WebServlet(name = "GenerateData", urlPatterns = { "/generateDatas" })
+@WebServlet(name = "GenerateData", urlPatterns = { "/generatedatas" })
 public class GenerateDataServlet extends HttpServlet{
 	
 	@Override
@@ -61,24 +56,22 @@ public class GenerateDataServlet extends HttpServlet{
 			for(int j=1;j<=(r.nextInt(20-1)+1);j++) {
 				
 				//EPOCH random value between 2008 and now.
-				long epoch = ThreadLocalRandom.current().nextLong((long) 1199221200000L,Instant.now().toEpochMilli() );
+				long epoch = ThreadLocalRandom.current().nextLong((long) 1199221200, Instant.now().getEpochSecond());
 				//ID of posts is MAX 64-BIT Value minus EPOCH value to get posts in order of date.
 				String id = Long.toString(Long.MAX_VALUE-epoch); 
 				Entity post = new Entity("Post", id);
 				post.setProperty("owner", KeyFactory.keyToString(user.getKey()));
 				post.setProperty("body", "Message of the post"+j);	
 				
-				//From StackOverflow -- generate random date time with Timestamp using Google App Engine
-				Instant instant = Instant.ofEpochMilli(epoch);	
+				Instant instant = Instant.ofEpochSecond(epoch);	
 				Date date = Date.from(instant);
 				
-				post.setProperty("date", date);
+				post.setProperty("date", epoch);
 				post.setProperty("URL", "https://dummyimage.com/600x600/000/fff&text="+date);
 				
 				
 				//Create receivers list --- NULL for now
-				HashSet<String> receivers = new HashSet<String>();
-				post.setProperty("receivers", receivers);
+				post.hasProperty("receivers");
 				//Create likes for Posts
 				HashSet<String> likes = new HashSet<String>();
 				for(int k=0; k < 150; k++ ) {
