@@ -1,2 +1,3 @@
 *.js linguist-detectable=false
-
+*.java linguist-detectable=true
+*.jsp linguist-detectable=true
