@@ -74,7 +74,7 @@ Object.size = function(obj) {
 };
 
 var User = {
-		data: null,
+		data: [],
 	    loadList: function() {
 		    console.log("request")
 	        return m.request({
@@ -86,6 +86,8 @@ var User = {
             });
 	    },
 }
+
+User.loadList()
 
 var Posts = {	
 		list: [],
@@ -102,7 +104,9 @@ var Posts = {
  		        	Posts.nextToken= result.nextPageToken
  	            } else {
  	            	Posts.nextToken=""
- 	            }});
+ 	            }
+	        	initialization();
+            });    
 	    },
 	    next: function() {
 	        return m.request({
@@ -119,77 +123,94 @@ var Posts = {
 	    }
 	}
 
-var ProfileView = {
-		 oninit: User.loadList(), 
-// 		 oninit: Posts.loadList,
-		 view: function() {
-		  	return 
-		  	m('div', {class:'media profile-information'},[
-			  	m('img', {class:'align-self-center mr-3 profile-logo', 'src': "/resources/img/user.png"}),
-		  		m('div', {class: 'media-body profile-information-body'}, [
-		  		m('h5', {class: 'mt-0'}, User.data.name),
-			  		m('div', {class: 'row'}, [
-			  			m('div', {class: 'col'}, [
-			  				m('b', {class: ''}, Object.size(Posts.list))
-			  			]),
-			  			m('div', {class: 'col'}, [
-			  				m('b', {class: ''}, "nb followers")
-			  			]),
-			  			m('div', {class: 'col'}, [
-			  				m('b', {class: ''}, Object.size(User.data.friends))
-			  			])
-			  		]),
-			  		m('div', {class: 'row'}, [
-			  			m('div', {class: 'col'}, [
-			  				m('b', {class: ''}, User.data.mail)
-			  			])
-					])
-			  	])
-		  	]),  	
-		  	m('hr', {class:'solid'}),
-		  	m('div', {class:'row'}[
-		  		m('div',{class:'col-12'} [
-// 					Posts.list.map(function(item) {
-// 						return m('div', {class: 'margin-top flex'}, [
-// 							m('div', {class: 'card'}, [
-// 								m('div', {class: 'card-header d-flex align-items-center'}, [
-// 	//	 							Need to find a solution to get the User mame by his STRING KEY
-// 	//	 							m('h5',{class: ''}, item.properties.owner), 
-// 									m('div', {class: 'col-sm-5 ml-auto'}, [
-// 										m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
-// 									])
-// 								]),
-// 								m('img',{class: 'card-img-top', 'src': item.properties.URL}),
-// 								m('div', {class: 'card-body'}, [
-// 									m('p', {class: ''}, item.properties.body)
-// 								]),
-// 								m('div', {class: 'card-footer text-muted'}, [
-// 									m('p', {class: 'card-text'}, [
-// 										m('a', {href: 'link_like', class: 'icon-block'}, [
-// 											Object.size(item.properties.likes), 
-// 											m('i', {class: 'fa fa-heart', style: 'color: #FF0000'}, "" ), 
-// 										])
-// 									])
-// 								])
-// 							])
-// 						]);
-// 					}),
-					test,
-					m('div', {class: 'seeMore'}, [
-						  m('button',{
-						      class: 'btn btn-outline-secondary btn-sm is-link',
-						      onclick: function(e) {Posts.next()}
-						      },
-						  "Next"),
-					])
+Posts.loadList()
+
+function initialization(){
+	
+	var ProfileView = {
+			 view: function() {
+			 return m('div', {class:'media profile-information'},[
+				  	m('img', {class:'align-self-center mr-3 profile-logo', src: "/resources/img/user.png"}),
+			  		m('div', {class: 'media-body profile-information-body'}, [
+						m('h5', {class: 'mt-0'}, User.data.name),
+				  		m('div', {class: 'row'}, [
+				  			m('div', {class: 'col'}, [
+	 			  				m('b', {class: ''}, Object.size(Posts.list)+" posts")
+				  			]),
+				  			m('div', {class: 'col'}, [
+				  				m('b', {class: ''}, "nb followers")
+				  			]),
+				  			m('div', {class: 'col'}, [
+	 			  				m('b', {class: ''}, Object.size(User.data.friends)+" friends")
+				  			])
+				  		]),
+				  		m('div', {class: 'row'}, [
+				  			m('div', {class: 'col'}, [
+				  				m('b', {class: ''}, User.data.mail),
+				  			])
+						])
+				  	]),
+				  	m('hr', {class:'solid'})
 				])
-		  	])
-			  	
+		 	}
+	};
+					
+	var PostsView = {
+		 view: function() {
+			 return m('div', {class:'row'},[
+	 		  		m('div',{class:'col-12'} [
+						Posts.list.map(function(item) {
+							return m('div', {class: 'margin-top flex'}, [
+								m('div', {class: 'card'}, [
+									m('div', {class: 'card-header d-flex align-items-center'}, [
+		//	 							Need to find a solution to get the User mame by his STRING KEY
+		//	 							m('h5',{class: ''}, item.properties.owner), 
+										m('div', {class: 'col-sm-5 ml-auto'}, [
+											m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
+										])
+									]),
+									m('img',{class: 'card-img-top', 'src': item.properties.URL}),
+									m('div', {class: 'card-body'}, [
+										m('p', {class: ''}, item.properties.body)
+									]),
+									m('div', {class: 'card-footer text-muted'}, [
+										m('p', {class: 'card-text'}, [
+											m('a', {href: 'link_like', class: 'icon-block'}, [
+												Object.size(item.properties.likes), 
+												m('i', {class: 'fa fa-heart', style: 'color: #FF0000'}, "" ), 
+											])
+										])
+									])
+								])
+							]);
+						}),
+	 					m('div', {class: 'seeMore'}, [
+	 						  m('button',{
+	 						      class: 'btn btn-outline-secondary btn-sm is-link',
+	 						      onclick: function(e) {Posts.next()}
+	 						      },
+	 						  "Next"),
+	 					])
+	 				])
+	 		  	])			  	
 		 }
+	};
+	
+	
+var view = {
+	view: function() {
+		return m('div', [
+			m("div", m(ProfileView)),
+		    m("div", m(PostsView)),
+	    ])
+	}
 };
 
+	m.mount(document.getElementById("script"), view);
+	
+}
 
-m.mount(document.getElementById("script"), ProfileView);
+
 
 
 </script>

@@ -135,7 +135,7 @@ public class TinyGramEndpoint {
 	@ApiMethod(name = "user_posts", path="get/users/{id}/posts", httpMethod = HttpMethod.GET)
 	public CollectionResponse<Entity> userPosts(@Named("id") String id,@Nullable @Named("next") String cursorString){
 		
-		Query q = new Query("Post").setFilter(new FilterPredicate("owner", FilterOperator.EQUAL, id)).addSort("date", SortDirection.DESCENDING);
+		Query q = new Query("Post").setFilter(new FilterPredicate("owner", FilterOperator.EQUAL, id));
 		PreparedQuery pq = datastore.prepare(q);
 		
 	    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(5);
