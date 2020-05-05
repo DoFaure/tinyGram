@@ -125,16 +125,8 @@ var Users = {
 	    }
 }
 
-function test(id) {
-    let itemClass = document.getElementById(id).className; 
-    if ( itemClass == 'fa fa-heart') {
-        document.getElementById(id).className = 'fa fa-heart-o';
-    } else {
-        document.getElementById(id).className = 'fa fa-heart';
-    }
-
-    console.log('ok like');
-}
+let uKey = document.getElementById("help").innerHTML.split("\"")[2];
+console.log(uKey)
 
 var PostView = {
 	 oninit: Posts.loadList(),
@@ -155,7 +147,7 @@ var PostView = {
 				return m('div', {class: 'margin-top flex'}, [
 					m('div', {class: 'card'}, [
 						m('div', {class: 'card-header d-flex align-items-center'}, [
-// 							Need to find a solution to get the User name by his STRING KEY
+// 							Need to find a solution to get the User mame by his STRING KEY
 // 							m('h5',{class: ''}, item.properties.owner), 
 							m('div', {class: 'col-sm-5 ml-auto'}, [
 								m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
@@ -167,17 +159,11 @@ var PostView = {
 						]),
 						m('div', {class: 'card-footer text-muted'}, [
 							m('p', {class: 'card-text'}, [
-                                if (item.properties.postLikes.includes("${entity.key}")) {
-                                   return m('a', {href: 'put/posts/'+item.key.id+'/like/${entity.key}', class: 'icon-block', onclick: test(item.properties.date)}, [
-                                        m('i', {class: 'fa fa-heart', style: 'color: #FF0000'}, "" ),
-                                    ]),
-                                } else {
-                                   return m('a', {href: 'put/posts/'+item.key.id+'/like/${entity.key}', class: 'icon-block'}, [
-                                        m('i', {class: 'fa fa-heart-o', style: 'color: #FF0000'}, "" )
-                                    ]),
-                                }
-                                " "+Object.size(item.properties.likes)+" likes" ,
-                            ])
+								m('a', {class: 'icon-block'}, [
+									m('i', {class: class_array[item], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
+								]),
+								m('p', {class: 'card-text'}, Object.size(item.properties.likes)+  " likes")
+							])
 						])
 					])
 				]);
@@ -196,6 +182,17 @@ var PostView = {
 var SuggestionView = {
 		 oninit: Users.loadList(),
 		 view: function() {
+			 var class_array = [];
+			 
+// 			 Posts.list.map(function(item) {
+// 				 console.log(item);
+// 				 if (item.properties.likes.includes(uKey)) {
+// 					 class_array[item] = 'fa fa-heart';
+// 				 } else {
+// 					 class_array[item] = 'fa fa-heart-o';
+// 				 }
+// 			 });
+			 
 		  	return m('div', {class: 'card'}, [
 		  			m('div', {class: 'card-header'}, [
 		  				m('div', {class: 'row'}, [
