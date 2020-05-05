@@ -34,7 +34,6 @@
     <script src="/bootstrap/js/bootstrap.js"></script>
     
     <!-- mithril import -->
-	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 	<script src="https://unpkg.com/mithril/mithril.js"></script>
 	<!-- -------------- -->
 	

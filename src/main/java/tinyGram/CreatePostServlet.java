@@ -17,8 +17,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-@WebServlet(name = "Profile", urlPatterns = { "/profile" })
-public class ProfileServlet extends HttpServlet {
+@WebServlet(name = "CreatePost", urlPatterns = { "/post" })
+public class CreatePostServlet extends HttpServlet {
 
 	 @Override
 	 public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -42,7 +42,7 @@ public class ProfileServlet extends HttpServlet {
 				}
 	
 	    }	    
-			    req.getRequestDispatcher("/profile.jsp").forward(req, resp);
+			    req.getRequestDispatcher("/post.jsp").forward(req, resp);
 	 }
 
 }

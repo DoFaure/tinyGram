@@ -352,8 +352,12 @@ public class TinyGramEndpoint {
 
 //--------------------------------------------------- ALL THE POST ---------------------------------------------------------//
 
-	
-	@ApiMethod(name = "createpost", httpMethod = HttpMethod.POST)
+	/**
+	 * 
+	 * @param Post 
+	 * @return Created Post
+	 */
+	@ApiMethod(name = "createpost", path="post/posts/create", httpMethod = HttpMethod.POST)
 	public Entity createPost(Post pm) {
 
 		long epochMilliNow = Instant.now().toEpochMilli();
