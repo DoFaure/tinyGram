@@ -28,7 +28,6 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <!-- mithril import -->
-<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 <script src="https://unpkg.com/mithril/mithril.js"></script>
 <!-- -------------- -->
 
@@ -64,7 +63,8 @@
 			</div>
 		</div>	
 	</div>
-
+	
+	<div id="help" hidden="true">"${entity.key}"</div>
 	<div id="script"></div>
 	
 
@@ -139,6 +139,17 @@ function test(id) {
 var PostView = {
 	 oninit: Posts.loadList(),
 	 view: function() {
+		 var class_array = [];
+		 
+		 Posts.list.map(function(item) {
+			 console.log(item);
+			 if (item.properties.likes.includes(uKey)) {
+				 class_array[item] = 'fa fa-heart';
+			 } else {
+				 class_array[item] = 'fa fa-heart-o';
+			 }
+		 });
+		 
 		return m('div', [
 			Posts.list.map(function(item) {
 				return m('div', {class: 'margin-top flex'}, [
@@ -208,7 +219,7 @@ var SuggestionView = {
 		  								])
 		  							]),
 		  							m('div', {class: 'follow'}, [
-		  								m('a', {class: 'btn btn-primary btn-sm', href: 'lien'}, "Follow")
+		  								m('a', {class: 'btn btn-primary btn-sm', id: item.key.name, onclick: function() {follow(item.key.name)}}, "Follow")
 		  							])
 		  						])
 	  						})
@@ -230,7 +241,86 @@ var view = {
 }
 
 m.mount(document.getElementById("script"), view)
+function updateLike(id) {
+	console.log('debut like pour ' + id);
+	
+	if (document.getElementById(id) != null) {
+		let aclass = document.getElementById(id).className; 
+		if (aclass.includes('fa-heart-o')) {
+			document.getElementById(id).className = 'fa fa-heart';
+			
+			var data = {'id_post': id,
+ 					'id_user_to_add': "${KeyFactory.keyToString(entity.key)}"}
+ 	    	
+			console.log("put:" + data)
+     		
+			m.request({
+         		method: "PUT",
+         		url: "_ah/api/tinyGramApi/v1/put/posts/" + id + "/like/" + "${KeyFactory.keyToString(entity.key)}",
+             	params: data,
+         	}).then(function(result) {
+     	 			console.log("ok:",result)
+         	 });
+			
+		} else {
+			document.getElementById(id).className = 'fa fa-heart-o';
+			
+			var data = {'id_post': id,
+ 					'id_user_to_remove': "${KeyFactory.keyToString(entity.key)}"}
+ 	    	
+			console.log("put:" + data)
+     		
+			m.request({
+         		method: "PUT",
+         		url: "_ah/api/tinyGramApi/v1/put/posts/" + id + "/unlike/" + "${KeyFactory.keyToString(entity.key)}",
+             	params: data,
+         	}).then(function(result) {
+     	 			console.log("ok:",result)
+         	 });
+		}
+	} else {
+		setTimeout(updateLike(id), 1000);
+	}
+	
+	console.log('ok like');
+}
 
+function follow(id) {
+	if (document.getElementById(id) != null) {
+		let aclass = document.getElementById(id).className; 
+		if (aclass.includes('primary')) {
+			document.getElementById(id).className = 'btn btn-danger btn-sm';
+			
+			var data = {'id_user': "${KeyFactory.keyToString(entity.key)}",
+					'id_user_to_add': id}
+	 	
+			console.log("put:" + data)
+				
+			m.request({
+		 		method: "PUT",
+		 		url: "_ah/api/tinyGramApi/v1/put/users/" + "${KeyFactory.keyToString(entity.key)}" + "/follow/" + id,
+		     	params: data,
+		 	}).then(function(result) {
+			 	console.log("ok:",result)
+		 	 });
+		} else {
+			document.getElementById(id).className = 'btn btn-primary btn-sm';
+			
+			var data = {'id_user': "${KeyFactory.keyToString(entity.key)}",
+					'id_user_to_remove': id}
+	 	
+			console.log("put:" + data)
+				
+			m.request({
+		 		method: "PUT",
+		 		url: "_ah/api/tinyGramApi/v1/put/users/" + "${KeyFactory.keyToString(entity.key)}" + "/unfollow/" + id,
+		     	params: data,
+		 	}).then(function(result) {
+			 	console.log("ok:",result)
+		 	 });
+			}
+	}
+}
 
 </script>
 
