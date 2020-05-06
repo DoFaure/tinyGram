@@ -18,6 +18,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
@@ -29,8 +30,6 @@ import entity.Post;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
-
-import com.google.appengine.api.datastore.Key;
 
 
 @Api(name = "tinyGramApi",
@@ -286,15 +285,15 @@ public class TinyGramEndpoint {
 	 * @param id_user_to_add
 	 */
 	@ApiMethod(name = "like_post", path="put/posts/{id_post}/like/{id_user_to_add}", httpMethod = HttpMethod.PUT)
-	public void likepost(@Named("id_post") String id_post, @Named("id_user_to_add") String id_user_to_add){
+	public void likepost(@Named("id_post") int id_post, @Named("id_user_to_add") String id_user_to_add){
 		
 		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
 		Transaction transac = datastore.beginTransaction();
-		try {			
-			
-			Entity post = datastore.get(KeyFactory.stringToKey(id_post));
+		
+		try {
+			Key postKey = KeyFactory.createKey("Post", Long.MAX_VALUE-id_post );
+			Entity post = datastore.get(postKey);
 			ArrayList<String> likes = (ArrayList<String>) post.getProperty("likes");
 			//create list if it's first like
 			if(likes == null) {
@@ -304,8 +303,7 @@ public class TinyGramEndpoint {
 			post.setProperty("likes", likes);
 			datastore.put(transac,post);		
 			transac.commit();
-				
-		
+
 		} catch (EntityNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -314,6 +312,7 @@ public class TinyGramEndpoint {
 				transac.rollback();
 			}
 		}
+
 	}
 	
 	/**
@@ -322,24 +321,24 @@ public class TinyGramEndpoint {
 	 *  
 	 * @param id_post
 	 * @param id_user_to_remove
+	 * @return 
 	 */
 	@ApiMethod(name = "unlike_post", path="put/posts/{id_post}/unlike/{id_user_to_remove}", httpMethod = HttpMethod.PUT)
-	public void unlikepost(@Named("id_post") String id_post, @Named("id_user_to_remove") String id_user_to_remove){
+	public void unlikepost(@Named("id_post") int id_post, @Named("id_user_to_remove") String id_user_to_remove){
 		
 		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
+		
 		Transaction transac = datastore.beginTransaction();
-		try {			
-			
-			Entity post = datastore.get(KeyFactory.stringToKey(id_post));
+		try {
+			Key postKey = KeyFactory.createKey("Post", Long.MAX_VALUE-id_post );
+			Entity post = datastore.get(postKey);
 			ArrayList<String> likes = (ArrayList<String>) post.getProperty("likes");
 			likes.remove(id_user_to_remove);	
 			post.setProperty("likes", likes);
 			datastore.put(transac,post);		
 			transac.commit();
 				
-		
 		} catch (EntityNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -348,6 +347,7 @@ public class TinyGramEndpoint {
 				transac.rollback();
 			}
 		}
+		
 	}
 
 //--------------------------------------------------- ALL THE POST ---------------------------------------------------------//

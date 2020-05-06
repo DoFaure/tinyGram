@@ -126,7 +126,6 @@ var Users = {
 }
 
 let uKey = document.getElementById("help").innerHTML.split("\"")[2];
-console.log(uKey)
 
 var PostView = {
 	 oninit: Posts.loadList(),
@@ -134,7 +133,6 @@ var PostView = {
 		 var class_array = [];
 		 
 		 Posts.list.map(function(item) {
-			 console.log(item);
 			 if (item.properties.likes.includes(uKey)) {
 				 class_array[item] = 'fa fa-heart';
 			 } else {
@@ -160,7 +158,7 @@ var PostView = {
 						m('div', {class: 'card-footer text-muted'}, [
 							m('p', {class: 'card-text'}, [
 								m('a', {class: 'icon-block'}, [
-									m('i', {class: class_array[item], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
+									m('i', {class: class_array[item], style: 'color: #FF0000', id: item.properties.date, onclick: function() {updateLike(item.properties.date)}, onload: function() {updateLike(item.properties.date)}}, '')
 								]),
 								m('p', {class: 'card-text'}, Object.size(item.properties.likes)+  " likes")
 							])
@@ -182,16 +180,21 @@ var PostView = {
 var SuggestionView = {
 		 oninit: Users.loadList(),
 		 view: function() {
+			 var my_friends = "${entity.properties.friends}";
 			 var class_array = [];
+			 var text = [] ;
 			 
-// 			 Posts.list.map(function(item) {
-// 				 console.log(item);
-// 				 if (item.properties.likes.includes(uKey)) {
-// 					 class_array[item] = 'fa fa-heart';
-// 				 } else {
-// 					 class_array[item] = 'fa fa-heart-o';
-// 				 }
-// 			 });
+			 Users.list.map(function(item) {
+				 
+				 if (my_friends.includes(', '+ item.key.name + ',') || my_friends.includes('['+ item.key.name + ']') ||  my_friends.includes('['+ item.key.name + ',') || my_friends.includes(', '+ item.key.name + ']')) {
+					 class_array[item.key.name] = 'btn btn-danger btn-sm';
+					 text[item.key.name] = "Unfollow";
+				 } else {
+					 class_array[item.key.name] = 'btn btn-primary btn-sm';
+					 text[item.key.name] = "Follow";
+
+				 }
+			 });
 			 
 		  	return m('div', {class: 'card'}, [
 		  			m('div', {class: 'card-header'}, [
@@ -216,7 +219,7 @@ var SuggestionView = {
 		  								])
 		  							]),
 		  							m('div', {class: 'follow'}, [
-		  								m('a', {class: 'btn btn-primary btn-sm', id: item.key.name, onclick: function() {follow(item.key.name)}}, "Follow")
+		  								m('a', {class: class_array[item.key.name], id: item.key.name, onclick: function() {follow(item.key.name)}}, text[item.key.name])
 		  							])
 		  						])
 	  						})
@@ -238,6 +241,7 @@ var view = {
 }
 
 m.mount(document.getElementById("script"), view)
+
 function updateLike(id) {
 	console.log('debut like pour ' + id);
 	
@@ -287,6 +291,7 @@ function follow(id) {
 		let aclass = document.getElementById(id).className; 
 		if (aclass.includes('primary')) {
 			document.getElementById(id).className = 'btn btn-danger btn-sm';
+			document.getElementById(id).innerHTML = 'Unfollow';
 			
 			var data = {'id_user': "${KeyFactory.keyToString(entity.key)}",
 					'id_user_to_add': id}
@@ -302,6 +307,7 @@ function follow(id) {
 		 	 });
 		} else {
 			document.getElementById(id).className = 'btn btn-primary btn-sm';
+			document.getElementById(id).innerHTML = 'Follow';
 			
 			var data = {'id_user': "${KeyFactory.keyToString(entity.key)}",
 					'id_user_to_remove': id}
