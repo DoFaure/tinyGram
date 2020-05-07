@@ -56,7 +56,9 @@
 	</nav>
 	<div class="container" id="logout">
 		<div class="row signout">
-			<div class="col-8"></div>
+			<div class="col-8">
+				<a href='/post' class="btn btn-primary btn-md">Create post</a>
+			</div>
 			<div class="col-4 signout">
 				<a href='<%=userService.createLogoutURL("/../index.jsp")%>'
 					class="btn btn-danger btn-sm">SIGN OUT</a>
@@ -258,7 +260,6 @@ function updateLike(id) {
 			m.request({
          		method: "PUT",
          		url: "_ah/api/tinyGramApi/v1/put/posts/" + id + "/like/" + "${KeyFactory.keyToString(entity.key)}",
-             	params: data,
          	}).then(function(result) {
      	 			console.log("ok:",result)
          	 });
@@ -274,7 +275,6 @@ function updateLike(id) {
 			m.request({
          		method: "PUT",
          		url: "_ah/api/tinyGramApi/v1/put/posts/" + id + "/unlike/" + "${KeyFactory.keyToString(entity.key)}",
-             	params: data,
          	}).then(function(result) {
      	 			console.log("ok:",result)
          	 });
