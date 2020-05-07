@@ -111,21 +111,39 @@ var Users = {
 
 var MembersView = {
 		 oninit: Users.loadList(),
-		 view: function() {			 
+		 view: function() {	
+			 
+			 var my_friends = "${entity.properties.friends}";
+			 var class_array = [];
+			 var text = [] ;
+			 
+			 Users.list.map(function(item) {
+				 
+				 if (my_friends.includes(', '+ item.key.name + ',') || my_friends.includes('['+ item.key.name + ']') ||  my_friends.includes('['+ item.key.name + ',') || my_friends.includes(', '+ item.key.name + ']')) {
+					 class_array[item.key.name] = 'btn btn-danger btn-sm';
+					 text[item.key.name] = "Unfollow";
+				 } else {
+					 class_array[item.key.name] = 'btn btn-primary btn-sm';
+					 text[item.key.name] = "Follow";
+
+				 }
+			 });
+			 
+			 
 		  	return m('div', {class: 'card'}, [
 		  		m('div', {class: 'list-members'}, [
 	  				Users.list.map(function(item) {
 	  					return m('div', {class: 'content'}, [
 	  						m('div', {class: 'identity'}, [
-	  							m('p', {class: 'card-text btn-align'}, [
-	  								m('a', {class: 'profile-link', href: '/profile'}, [
-	  									m('b', item.properties.name),	
-	  								])
-	  							])
-	  						]),
-	  						m('div', {class: 'follow'}, [
-	  							m('a', {class: 'btn btn-primary btn-sm', href: 'lien'}, "Follow")
-	  						])
+  								m('p', {class: 'card-text btn-align'}, [
+  									m('a', {class: 'profile-link', href: 'lien'}, [
+  										m('b', {}, item.properties.name)
+  									])
+  								])
+  							]),
+  							m('div', {class: 'follow'}, [
+  								m('a', {class: class_array[item.key.name], id: item.key.name, onclick: function() {follow(item.key.name)}}, text[item.key.name])
+  							])
 	  					])
 	  				})
 		  		]),
@@ -140,6 +158,46 @@ var MembersView = {
 };
 
 m.mount(document.getElementById("script"), MembersView);
+
+
+function follow(id) {
+	if (document.getElementById(id) != null) {
+		let aclass = document.getElementById(id).className; 
+		if (aclass.includes('primary')) {
+			document.getElementById(id).className = 'btn btn-danger btn-sm';
+			document.getElementById(id).innerHTML = 'Unfollow';
+			
+			var data = {'id_user': "${KeyFactory.keyToString(entity.key)}",
+					'id_user_to_add': id}
+	 	
+			console.log("put:" + data)
+				
+			m.request({
+		 		method: "PUT",
+		 		url: "_ah/api/tinyGramApi/v1/put/users/" + "${KeyFactory.keyToString(entity.key)}" + "/follow/" + id,
+		     	params: data,
+		 	}).then(function(result) {
+			 	console.log("ok:",result)
+		 	 });
+		} else {
+			document.getElementById(id).className = 'btn btn-primary btn-sm';
+			document.getElementById(id).innerHTML = 'Follow';
+			
+			var data = {'id_user': "${KeyFactory.keyToString(entity.key)}",
+					'id_user_to_remove': id}
+	 	
+			console.log("put:" + data)
+				
+			m.request({
+		 		method: "PUT",
+		 		url: "_ah/api/tinyGramApi/v1/put/users/" + "${KeyFactory.keyToString(entity.key)}" + "/unfollow/" + id,
+		     	params: data,
+		 	}).then(function(result) {
+			 	console.log("ok:",result)
+		 	 });
+			}
+	}
+}
 
 
 </script>

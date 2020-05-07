@@ -1,3 +1,6 @@
+<%@ page import="com.google.appengine.api.datastore.Key"%>
+<%@ page import="com.google.appengine.api.datastore.KeyFactory"%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,27 +41,26 @@
 		<div class="nav navbar-nav navbar-right justify-content-end">
 			<div class="nav navbar-nav navbar-right">
 	 	  		<a class="like" href="/followers.jsp"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  		<a class="profile" href="/profile.jsp?key="><img class="icon-nav" src="/resources/img/user.png"></a>
+ 	 	  		<a class="profile" href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  		</div>
 		</div>
 	</nav>
-	
+
 	<h1 class="titlePost">Create your post</h1>
 
 	<div class="container" id="script"></div>
 
 	<script>	
 
-// for the example
 var MyPost = {
 	    postMessage: function() {
- 			var data={'owner':me,
+ 			var data={
+ 					'owner':"${KeyFactory.keyToString(entity.key)}",
  					'url':PostForm.url,
  					'body':PostForm.body}
- 	    	console.log("post:"+data)
      		return m.request({
          		method: "POST",
-         		url: "_ah/api/myApi/v1/post/posts/create",
+         		url: "_ah/api/tinyGramApi/v1/post/posts/create",
              	params: data,
          	})
   	    	.then(function(result) {

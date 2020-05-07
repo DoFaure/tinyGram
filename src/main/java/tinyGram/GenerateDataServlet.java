@@ -57,7 +57,7 @@ public class GenerateDataServlet extends HttpServlet{
 				
 				//EPOCH random value between 2008 and now.
 				long epoch = ThreadLocalRandom.current().nextLong((long) 1199221200, Instant.now().getEpochSecond());
-				//ID of posts is MAX 64-BIT Value minus EPOCH value to get posts in order of date.
+				//ID of posts is MAX 64-BIT Value minus EPOCH value to get posts order by date.
 				String id = Long.toString(Long.MAX_VALUE-epoch); 
 				Entity post = new Entity("Post", id);
 				post.setProperty("owner", KeyFactory.keyToString(user.getKey()));

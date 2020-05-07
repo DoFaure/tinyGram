@@ -1,21 +1,5 @@
-<%@ page import="com.google.appengine.api.users.UserServiceFactory"%>
-<%@ page import="java.security.Principal"%>
-<%@ page import="java.util.ArrayList"%>
-<%@ page import="java.text.SimpleDateFormat"%>
-<%@ page import="com.google.appengine.api.datastore.DatastoreService"%>
-<%@ page import="com.google.appengine.api.datastore.Key"%>
-<%@ page
-	import="com.google.appengine.api.datastore.DatastoreServiceFactory"%>
-<%@ page import="com.google.appengine.api.datastore.Entity"%>
+<%@ page import="com.google.appengine.api.datastore.DatastoreServiceFactory"%>
 <%@ page import="com.google.appengine.api.datastore.KeyFactory"%>
-<%@ page
-	import="com.google.appengine.api.datastore.EntityNotFoundException"%>
-<%@ page import="com.google.appengine.api.users.UserService"%>
-
-
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-
-
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -61,6 +45,7 @@
  <div class="container">
 	<div id="script"></div>
  </div>
+ 
 
 <script>
 
@@ -153,54 +138,70 @@ function initialization(){
 				])
 		 	}
 	};
+	
+
 					
-	var PostsView = {
-		 view: function() {
-			 return m('div', {class:'row'},[
-	 		  		m('div',{class:'col-12'} [
-						Posts.list.map(function(item) {
-							return m('div', {class: 'margin-top flex'}, [
-								m('div', {class: 'card'}, [
-									m('div', {class: 'card-header d-flex align-items-center'}, [
-		//	 							Need to find a solution to get the User mame by his STRING KEY
-		//	 							m('h5',{class: ''}, item.properties.owner), 
-										m('div', {class: 'col-sm-5 ml-auto'}, [
-											m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
-										])
-									]),
-									m('img',{class: 'card-img-top', 'src': item.properties.URL}),
-									m('div', {class: 'card-body'}, [
-										m('p', {class: ''}, item.properties.body)
-									]),
-									m('div', {class: 'card-footer text-muted'}, [
-										m('p', {class: 'card-text'}, [
-											m('a', {href: 'link_like', class: 'icon-block'}, [
-												Object.size(item.properties.likes), 
-												m('i', {class: 'fa fa-heart', style: 'color: #FF0000'}, "" ), 
-											])
-										])
+	var PostView = {
+			 oninit: Posts.loadList(),
+			 view: function() {
+				 var class_array = [];
+				 
+				 Posts.list.map(function(item) {
+					 if(item.properties.likes){
+						 if (item.properties.likes.includes("${KeyFactory.keyToString(entity.key)}")) {
+							 class_array[item] = 'fa fa-heart';
+						 } else {
+							 class_array[item] = 'fa fa-heart-o';
+						 }
+					 }else{
+						 class_array[item] = 'fa fa-heart-o';
+					 }
+					
+				 });
+				 
+				return m('div', [
+					Posts.list.map(function(item) {
+						return m('div', {class: 'margin-top flex'}, [
+							m('div', {class: 'card'}, [
+								m('div', {class: 'card-header d-flex align-items-center'}, [
+//		 							Need to find a solution to get the User mame by his STRING KEY
+//		 							m('h5',{class: ''}, item.properties.owner), 
+									m('div', {class: 'col-sm-5 ml-auto'}, [
+										m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
+									])
+								]),
+								m('img',{class: 'card-img-top', 'src': item.properties.URL}),
+								m('div', {class: 'card-body'}, [
+									m('p', {class: ''}, item.properties.body)
+								]),
+								m('div', {class: 'card-footer text-muted'}, [
+									m('p', {class: 'card-text'}, [
+										m('a', {class: 'icon-block'}, [
+											m('i', {class: class_array[item], style: 'color: #FF0000', id: item.properties.date, onclick: function() {updateLike(item.properties.date)}, onload: function() {updateLike(item.properties.date)}}, '')
+										]),
+										m('p', {class: 'card-text'}, Object.size(item.properties.likes)+  " likes")
 									])
 								])
-							]);
-						}),
-	 					m('div', {class: 'seeMore'}, [
-	 						  m('button',{
-	 						      class: 'btn btn-outline-secondary btn-sm is-link',
-	 						      onclick: function(e) {Posts.next()}
-	 						      },
-	 						  "Next"),
-	 					])
-	 				])
-	 		  	])			  	
-		 }
-	};
+							])
+						]);
+					}),
+					m('div', {class: 'seeMore'}, [
+						  m('button',{
+						      class: 'btn btn-outline-secondary btn-sm is-link',
+						      onclick: function(e) {Posts.next()}
+						      },
+						  "Next"),
+					])
+				])
+			 }
+		}
 	
 	
 var view = {
 	view: function() {
 		return m('div', [
 			m("div", m(ProfileView)),
-		    m("div", m(PostsView)),
+		    m("div", {class: 'col-12'}, m(PostView)),
 	    ])
 	}
 };

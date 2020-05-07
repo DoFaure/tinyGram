@@ -4,9 +4,6 @@
 <%@ page import="com.google.appengine.api.users.UserService"%>
 
 
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-
-
 <%!UserService userService = UserServiceFactory.getUserService();%>
 
 
@@ -66,7 +63,6 @@
 		</div>	
 	</div>
 	
-	<div id="help" hidden="true">"${entity.key}"</div>
 	<div id="script"></div>
 	
 
@@ -127,7 +123,6 @@ var Users = {
 	    }
 }
 
-let uKey = document.getElementById("help").innerHTML.split("\"")[2];
 
 var PostView = {
 	 oninit: Posts.loadList(),
@@ -135,10 +130,14 @@ var PostView = {
 		 var class_array = [];
 		 
 		 Posts.list.map(function(item) {
-			 if (item.properties.likes.includes(uKey)) {
-				 class_array[item] = 'fa fa-heart';
-			 } else {
-				 class_array[item] = 'fa fa-heart-o';
+			 if(item.properties.likes){
+				 if (item.properties.likes.includes("${KeyFactory.keyToString(entity.key)}")) {
+					 class_array[item.key.name] = 'fa fa-heart';
+				 } else {
+					 class_array[item.key.name]= 'fa fa-heart-o';
+				 }
+			 }else{
+				 class_array[item.key.name] = 'fa fa-heart-o';
 			 }
 		 });
 		 
@@ -160,7 +159,7 @@ var PostView = {
 						m('div', {class: 'card-footer text-muted'}, [
 							m('p', {class: 'card-text'}, [
 								m('a', {class: 'icon-block'}, [
-									m('i', {class: class_array[item], style: 'color: #FF0000', id: item.properties.date, onclick: function() {updateLike(item.properties.date)}, onload: function() {updateLike(item.properties.date)}}, '')
+									m('i', {class: class_array[item.key.name], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
 								]),
 								m('p', {class: 'card-text'}, Object.size(item.properties.likes)+  " likes")
 							])

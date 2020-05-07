@@ -283,17 +283,19 @@ public class TinyGramEndpoint {
 	 *  
 	 * @param id_post
 	 * @param id_user_to_add
+	 * @throws EntityNotFoundException 
 	 */
 	@ApiMethod(name = "like_post", path="put/posts/{id_post}/like/{id_user_to_add}", httpMethod = HttpMethod.PUT)
-	public void likepost(@Named("id_post") int id_post, @Named("id_user_to_add") String id_user_to_add){
+	public Entity likepost(@Named("id_post") String id_post, @Named("id_user_to_add") String id_user_to_add) throws EntityNotFoundException{
 		
 		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		Key postKey = KeyFactory.createKey("Post", id_post);
+		Entity post = datastore.get(postKey);
 		Transaction transac = datastore.beginTransaction();
 		
 		try {
-			Key postKey = KeyFactory.createKey("Post", Long.MAX_VALUE-id_post );
-			Entity post = datastore.get(postKey);
+		
 			ArrayList<String> likes = (ArrayList<String>) post.getProperty("likes");
 			//create list if it's first like
 			if(likes == null) {
@@ -304,14 +306,14 @@ public class TinyGramEndpoint {
 			datastore.put(transac,post);		
 			transac.commit();
 
-		} catch (EntityNotFoundException e) {
-			e.printStackTrace();
 		}
 		finally {
 			if(transac.isActive()) {
 				transac.rollback();
 			}
 		}
+		
+		return post;
 
 	}
 	
@@ -322,25 +324,24 @@ public class TinyGramEndpoint {
 	 * @param id_post
 	 * @param id_user_to_remove
 	 * @return 
+	 * @throws EntityNotFoundException 
 	 */
 	@ApiMethod(name = "unlike_post", path="put/posts/{id_post}/unlike/{id_user_to_remove}", httpMethod = HttpMethod.PUT)
-	public void unlikepost(@Named("id_post") int id_post, @Named("id_user_to_remove") String id_user_to_remove){
+	public Entity unlikepost(@Named("id_post") String id_post, @Named("id_user_to_remove") String id_user_to_remove) throws EntityNotFoundException{
 		
 		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		
+		Key postKey = KeyFactory.createKey("Post", id_post );
+		Entity post = datastore.get(postKey);
 		Transaction transac = datastore.beginTransaction();
+		
 		try {
-			Key postKey = KeyFactory.createKey("Post", Long.MAX_VALUE-id_post );
-			Entity post = datastore.get(postKey);
 			ArrayList<String> likes = (ArrayList<String>) post.getProperty("likes");
 			likes.remove(id_user_to_remove);	
 			post.setProperty("likes", likes);
 			datastore.put(transac,post);		
 			transac.commit();
-				
-		} catch (EntityNotFoundException e) {
-			e.printStackTrace();
+			
 		}
 		finally {
 			if(transac.isActive()) {
@@ -348,6 +349,7 @@ public class TinyGramEndpoint {
 			}
 		}
 		
+		return post;
 	}
 
 //--------------------------------------------------- ALL THE POST ---------------------------------------------------------//
@@ -360,12 +362,8 @@ public class TinyGramEndpoint {
 	@ApiMethod(name = "createpost", path="post/posts/create", httpMethod = HttpMethod.POST)
 	public Entity createPost(Post pm) {
 
-		long epochMilliNow = Instant.now().toEpochMilli();
-		String id = Long.toString(Long.MAX_VALUE-epochMilliNow);
-		
-		Instant instant = Instant.ofEpochMilli(epochMilliNow);	
-		Date date = Date.from(instant);
-		
+		long epochNow = Instant.now().getEpochSecond();
+		String id = Long.toString(Long.MAX_VALUE-epochNow);
 		
 		Entity e = new Entity("Post", id);
 		e.setProperty("owner", pm.owner);
@@ -373,7 +371,7 @@ public class TinyGramEndpoint {
 		e.setProperty("body", pm.body);
 		e.hasProperty("likes");
 		e.hasProperty("receivers");
-		e.setProperty("date", date);
+		e.setProperty("date", epochNow);
 
 		Transaction txn = datastore.beginTransaction();
 		datastore.put(e);
