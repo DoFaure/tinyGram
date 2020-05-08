@@ -137,8 +137,6 @@ var Posts = {
 				])
 		 	}
 	};
-	
-
 					
 	var PostView = {
 			 oninit: Posts.loadList(),
