@@ -38,7 +38,7 @@
 	  </form>
 	  <div class="nav navbar-nav navbar-right">
 	 	  <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  <a class="profile" href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
+ 	 	  <a class="profile" href="/profile?user=${entity.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  </div>
 	</nav>
  
@@ -71,7 +71,7 @@ var User = {
 	    },
 }
 
-User.loadList()
+
 
 var Posts = {	
 		list: [],
@@ -89,7 +89,6 @@ var Posts = {
  	            } else {
  	            	Posts.nextToken=""
  	            }
-	        	initialization();
             });    
 	    },
 	    next: function() {
@@ -107,11 +106,9 @@ var Posts = {
 	    }
 	}
 
-Posts.loadList()
-
-function initialization(){
 	
 	var ProfileView = {
+			 oninit: User.loadList(),
 			 view: function() {
 			 return m('div', {class:'media profile-information'},[
 				  	m('img', {class:'align-self-center mr-3 profile-logo', src: "/resources/img/user.png"}),
@@ -119,7 +116,9 @@ function initialization(){
 						m('h5', {class: 'mt-0'}, User.data.name),
 				  		m('div', {class: 'row'}, [
 				  			m('div', {class: 'col'}, [
-	 			  				m('b', {class: ''}, Object.size(Posts.list)+" posts")
+	 			  				//m('b', {class: ''}, Object.size(Posts.list)+" posts")
+	 			  				m('b', {class: ''}, "nb posts")
+
 				  			]),
 				  			m('div', {class: 'col'}, [
 				  				m('b', {class: ''}, "nb followers")
@@ -200,15 +199,16 @@ function initialization(){
 var view = {
 	view: function() {
 		return m('div', [
-			m("div", m(ProfileView)),
-		    m("div", {class: 'col-12'}, m(PostView)),
+			m('div', m(ProfileView)),
+		   	m('div', {class: 'row justify-content-center' }, [
+		   		m("div", {class: 'col-8'}, m(PostView)),
+		   	]) 	
 	    ])
 	}
 };
 
-	m.mount(document.getElementById("script"), view);
+m.mount(document.getElementById("script"), view);
 	
-}
 
 
 

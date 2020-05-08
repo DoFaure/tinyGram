@@ -30,7 +30,7 @@ public class ProfileServlet extends HttpServlet {
 		    resp.sendRedirect("/login");
 		 }else {
 			 //Get connected user informations
-			    Key keyNewUser = KeyFactory.createKey("User", req.getUserPrincipal().getName());
+			    Key keyNewUser = KeyFactory.createKey("User", req.getParameter("user"));
 			    Entity e;
 			    try {
 			        e = datastore.get(keyNewUser);

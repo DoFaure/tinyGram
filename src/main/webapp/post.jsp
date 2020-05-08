@@ -41,7 +41,7 @@
 		<div class="nav navbar-nav navbar-right justify-content-end">
 			<div class="nav navbar-nav navbar-right">
 	 	  		<a class="like" href="/followers.jsp"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  		<a class="profile" href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
+ 	 	  		<a class="profile" href="/profile?user=${entity.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  		</div>
 		</div>
 	</nav>

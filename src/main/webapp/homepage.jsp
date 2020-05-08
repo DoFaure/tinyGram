@@ -47,7 +47,7 @@
 		<div class="nav navbar-nav navbar-right justify-content-end">
 			<div class="nav navbar-nav navbar-right">
 	 	  		<a class="like" href="/followers.jsp"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  		<a class="profile" href="/profile?key=${KeyFactory.keyToString(entity.key)}"><img class="icon-nav" src="/resources/img/user.png"></a>
+ 	 	  		<a class="profile" href="/profile?user=${entity.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  		</div>
 		</div>
 	</nav>
@@ -161,7 +161,7 @@ var PostView = {
 								m('a', {class: 'icon-block'}, [
 									m('i', {class: class_array[item.key.name], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
 								]),
-								m('p', {class: 'card-text'}, Object.size(item.properties.likes)+  " likes")
+							    " " + Object.size(item.properties.likes) + " likes"
 							])
 						])
 					])
@@ -214,7 +214,7 @@ var SuggestionView = {
 		  						return m('div', {class: 'content'}, [
 		  							m('div', {class: 'identity'}, [
 		  								m('p', {class: 'card-text btn-align'}, [
-		  									m('a', {class: 'profile-link', href: 'lien'}, [
+		  									m('a', {class: 'profile-link', href: '/profile?user='+ item.key.name }, [
 		  										m('b', {}, item.properties.name)
 		  									])
 		  								])
