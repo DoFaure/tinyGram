@@ -223,7 +223,9 @@ public class TinyGramEndpoint {
 			if(friends == null) {
 				friends = new ArrayList<String>();
 			}	
-			friends.add(id_user_to_add);			
+			if(!friends.contains(id_user_to_add)) {
+				friends.add(id_user_to_add);			
+			}
 			user.setProperty("friends", friends);
 			datastore.put(transac,user);		
 			transac.commit();
@@ -257,7 +259,10 @@ public class TinyGramEndpoint {
 		try {			
 			Entity user = datastore.get(KeyFactory.stringToKey(id_user));
 			ArrayList<String> friends = (ArrayList<String>) user.getProperty("friends");
-			friends.remove(id_user_to_remove);			
+			
+			if(friends.contains(id_user_to_remove)) {
+				friends.remove(id_user_to_remove);			
+			}
 			user.setProperty("friends", friends);
 			datastore.put(transac,user);		
 			transac.commit();
@@ -296,8 +301,10 @@ public class TinyGramEndpoint {
 			//create list if it's first like
 			if(likes == null) {
 				likes = new ArrayList<String>();
-			}	
-			likes.add(id_user_to_add);			
+			}
+			if(!likes.contains(id_user_to_add)) {
+				likes.add(id_user_to_add);			
+			}
 			post.setProperty("likes", likes);
 			datastore.put(transac,post);		
 			transac.commit();
@@ -333,7 +340,10 @@ public class TinyGramEndpoint {
 		
 		try {
 			ArrayList<String> likes = (ArrayList<String>) post.getProperty("likes");
-			likes.remove(id_user_to_remove);	
+			
+			if(likes.contains(id_user_to_remove)) {
+				likes.remove(id_user_to_remove);	
+			}
 			post.setProperty("likes", likes);
 			datastore.put(transac,post);		
 			transac.commit();
