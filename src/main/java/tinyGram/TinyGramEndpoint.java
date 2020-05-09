@@ -147,8 +147,6 @@ public class TinyGramEndpoint {
 		cursorString = results.getCursor().toWebSafeString();
 		
 		return CollectionResponse.<Entity>builder().setItems(results).setNextPageToken(cursorString).build();
-
-		
 	}
 	
 	/**

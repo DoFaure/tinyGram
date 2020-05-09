@@ -38,7 +38,7 @@
 	  </form>
 	  <div class="nav navbar-nav navbar-right">
 	 	  <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  <a class="profile" href="/profile?user=${entity.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
+ 	 	  <a class="profile" href="/profile?user=${actualU.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  </div>
 	</nav>
  
@@ -145,15 +145,14 @@ var Posts = {
 				 
 				 Posts.list.map(function(item) {
 					 if(item.properties.likes){
-						 if (item.properties.likes.includes("${KeyFactory.keyToString(entity.key)}")) {
-							 class_array[item] = 'fa fa-heart';
+						 if (item.properties.likes.includes("${KeyFactory.keyToString(actualU.key)}")) {
+							 class_array[item.key.name] = 'fa fa-heart';
 						 } else {
-							 class_array[item] = 'fa fa-heart-o';
+							 class_array[item.key.name]= 'fa fa-heart-o';
 						 }
 					 }else{
-						 class_array[item] = 'fa fa-heart-o';
+						 class_array[item.key.name] = 'fa fa-heart-o';
 					 }
-					
 				 });
 				 
 				return m('div', [
@@ -174,9 +173,9 @@ var Posts = {
 								m('div', {class: 'card-footer text-muted'}, [
 									m('p', {class: 'card-text'}, [
 										m('a', {class: 'icon-block'}, [
-											m('i', {class: class_array[item], style: 'color: #FF0000', id: item.properties.date, onclick: function() {updateLike(item.properties.date)}, onload: function() {updateLike(item.properties.date)}}, '')
+											m('i', {class: class_array[item.key.name], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
 										]),
-										m('p', {class: 'card-text'}, Object.size(item.properties.likes)+  " likes")
+										" " + Object.size(item.properties.likes) +  " likes"
 									])
 								])
 							])
@@ -207,7 +206,47 @@ var view = {
 
 m.mount(document.getElementById("script"), view);
 	
-
+function updateLike(id) {
+	console.log('debut like pour ' + id);
+	
+	if (document.getElementById(id) != null) {
+		let aclass = document.getElementById(id).className; 
+		if (aclass.includes('fa-heart-o')) {
+			document.getElementById(id).className = 'fa fa-heart';
+			
+			var data = {'id_post': id,
+ 					'id_user_to_add': "${KeyFactory.keyToString(actualU.key)}"}
+ 	    	
+			console.log("put:" + data)
+     		
+			m.request({
+         		method: "PUT",
+         		url: "_ah/api/tinyGramApi/v1/put/posts/" + id + "/like/" + "${KeyFactory.keyToString(actualU.key)}",
+         	}).then(function(result) {
+     	 			console.log("ok:",result)
+         	 });
+			
+		} else {
+			document.getElementById(id).className = 'fa fa-heart-o';
+			
+			var data = {'id_post': id,
+ 					'id_user_to_remove': "${KeyFactory.keyToString(entity.key)}"}
+ 	    	
+			console.log("put:" + data)
+     		
+			m.request({
+         		method: "PUT",
+         		url: "_ah/api/tinyGramApi/v1/put/posts/" + id + "/unlike/" + "${KeyFactory.keyToString(actualU.key)}",
+         	}).then(function(result) {
+     	 			console.log("ok:",result)
+         	 });
+		}
+	} else {
+		setTimeout(updateLike(id), 1000);
+	}
+	
+	console.log('ok like');
+}
 
 
 
