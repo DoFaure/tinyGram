@@ -51,6 +51,9 @@
 	<div class="container" id="script"></div>
 
 	<script>	
+	
+function redirection() {alert('Your post has been created, you will be redirect');
+document.location.href="/profile?user=${entity.properties.mail}";}	
 
 var MyPost = {
 	    postMessage: function() {
@@ -64,7 +67,8 @@ var MyPost = {
              	params: data,
          	})
   	    	.then(function(result) {
-     	 			console.log("got:",result)
+     	 			console.log("got:",result),
+     	 			redirection()
          	 	})
      	}
 }
@@ -77,8 +81,7 @@ var PostForm = {
 		    return m("form", {
 		      onsubmit: function(e) {
 		        e.preventDefault()
-				if (url="") {url="https://dummyimage.com/320x200/000/fff&text="+Date.now()} 
-				if (body="") {body="bla bla bla \n"+Date.now()}
+				if (PostForm.body=="") {PostForm.body="bla bla bla \n"+Date.now()}
 		        MyPost.postMessage()
 		      }}, 
 		      [

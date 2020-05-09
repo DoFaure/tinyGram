@@ -139,13 +139,11 @@ public class TinyGramEndpoint {
 		
 	    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(5);
 		
-	    QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
-	    
 	    if (cursorString != null) {
 		    	fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
 		}
-		
-
+	    
+	    QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
 		cursorString = results.getCursor().toWebSafeString();
 		
 		return CollectionResponse.<Entity>builder().setItems(results).setNextPageToken(cursorString).build();
@@ -365,9 +363,16 @@ public class TinyGramEndpoint {
 		long epochNow = Instant.now().getEpochSecond();
 		String id = Long.toString(Long.MAX_VALUE-epochNow);
 		
+		
 		Entity e = new Entity("Post", id);
 		e.setProperty("owner", pm.owner);
-		e.setProperty("URL", pm.url);
+		if(pm.url.equals("")) {
+			Instant instant = Instant.ofEpochSecond(epochNow);	
+			Date date = Date.from(instant);
+			e.setProperty("URL", "https://dummyimage.com/600x600/000/fff&text="+date);
+		}else {
+			e.setProperty("URL", pm.url);
+		}
 		e.setProperty("body", pm.body);
 		e.hasProperty("likes");
 		e.hasProperty("receivers");
