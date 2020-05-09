@@ -64,6 +64,17 @@
   text-align: center !important;
 }
 
+/* div like/unlike action */
+.user-action-likes{
+	display: flex !important;
+	clear: none;
+}
+
+.likes{
+    margin-left: 5px;
+}
+/* ********************* */
+
 .identity, .follow {
     display: inline-block;
     vertical-align: middle;

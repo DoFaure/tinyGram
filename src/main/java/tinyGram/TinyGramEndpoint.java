@@ -74,14 +74,15 @@ public class TinyGramEndpoint {
 	}
 	
 	/**
-	 * Return the list of the users that like the post (string key given) 
+	 * Return the list of the users that likes the post (string given) 
 	 * @param id - Post String key
-	 * @return List<String> post likes
+	 * @return List<String> List of users 
 	 */
 	@ApiMethod(name = "likes_post", path="get/posts/{id}/likes", httpMethod = HttpMethod.GET)
 	public List<String> postsLikes(@Named("id") String id){
 		
-		Query q = new Query("Post").setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, KeyFactory.stringToKey(id)));
+		Key post = KeyFactory.createKey("Post", id);
+		Query q = new Query("Post").setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, post));
 		PreparedQuery pq = datastore.prepare(q);
 		Entity result = pq.asSingleEntity();
 		List<String> likes = (List<String>) result.getProperty("likes");

@@ -105,9 +105,25 @@ var Posts = {
 	            }})
 	    }
 	}
-
 	
-	var ProfileView = {
+	
+var Likes = {
+			loadLikes: function(id){
+				return m.request({
+					method: "GET",
+					url: "_ah/api/tinyGramApi/v1/get/posts/" + id + "/likes"})
+				.then(function(result){
+					if(result != null){
+						document.getElementsByClassName('likes ' + id)[0].innerHTML = " " + result.items.length + " likes"
+					}else{
+						document.getElementsByClassName('likes ' + id)[0].innerHTML = " 0 likes"
+					}
+				})
+			}
+	}
+
+
+var ProfileView = {
 			 oninit: User.loadList(),
 			 view: function() {
 			 return m('div', {class:'media profile-information'},[
@@ -137,8 +153,10 @@ var Posts = {
 				])
 		 	}
 	};
-					
-	var PostView = {
+
+
+
+var PostView = {
 			 oninit: Posts.loadList(),
 			 view: function() {
 				 var class_array = [];
@@ -171,11 +189,13 @@ var Posts = {
 									m('p', {class: ''}, item.properties.body)
 								]),
 								m('div', {class: 'card-footer text-muted'}, [
-									m('p', {class: 'card-text'}, [
-										m('a', {class: 'icon-block'}, [
-											m('i', {class: class_array[item.key.name], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
+									m('div', {class: 'card-text user-action-likes'}, [
+										m('div',[
+											m('a', {class: 'icon-block'}, [
+												m('i', {class: class_array[item.key.name], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
+											])
 										]),
-										" " + Object.size(item.properties.likes) +  " likes"
+									    m('div',{class:'likes ' + item.key.name} ," " + Object.size(item.properties.likes) + " likes"),
 									])
 								])
 							])
@@ -207,7 +227,7 @@ var view = {
 m.mount(document.getElementById("script"), view);
 	
 function updateLike(id) {
-	console.log('debut like pour ' + id);
+
 	
 	if (document.getElementById(id) != null) {
 		let aclass = document.getElementById(id).className; 
@@ -217,13 +237,12 @@ function updateLike(id) {
 			var data = {'id_post': id,
  					'id_user_to_add': "${KeyFactory.keyToString(actualU.key)}"}
  	    	
-			console.log("put:" + data)
      		
 			m.request({
          		method: "PUT",
          		url: "_ah/api/tinyGramApi/v1/put/posts/" + id + "/like/" + "${KeyFactory.keyToString(actualU.key)}",
          	}).then(function(result) {
-     	 			console.log("ok:",result)
+     	 			Likes.loadLikes(id)
          	 });
 			
 		} else {
@@ -232,20 +251,18 @@ function updateLike(id) {
 			var data = {'id_post': id,
  					'id_user_to_remove': "${KeyFactory.keyToString(entity.key)}"}
  	    	
-			console.log("put:" + data)
      		
 			m.request({
          		method: "PUT",
          		url: "_ah/api/tinyGramApi/v1/put/posts/" + id + "/unlike/" + "${KeyFactory.keyToString(actualU.key)}",
          	}).then(function(result) {
-     	 			console.log("ok:",result)
+     	 			Likes.loadLikes(id)
          	 });
 		}
 	} else {
 		setTimeout(updateLike(id), 1000);
 	}
 	
-	console.log('ok like');
 }
 
 
