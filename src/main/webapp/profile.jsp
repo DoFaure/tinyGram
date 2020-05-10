@@ -89,6 +89,12 @@ var Posts = {
  	            } else {
  	            	Posts.nextToken=""
  	            }
+	        	
+	        	setTimeout(() => {
+		            Posts.list.map(function(item) {
+		            	printOwner(item.properties.owner, item.key.name);
+		            });
+		         }, 200);
             });    
 	    },
 	    next: function() {
@@ -102,7 +108,14 @@ var Posts = {
 		        	Posts.nextToken= result.nextPageToken
 	            } else {
 	            	Posts.nextToken=""
-	            }})
+	            }
+	        	
+	        	setTimeout(() => {
+		            Posts.list.map(function(item) {
+		            	printOwner(item.properties.owner, item.key.name);
+		            });
+		         }, 200);
+	        })
 	    }
 	}
 	
@@ -178,8 +191,7 @@ var PostView = {
 						return m('div', {class: 'margin-top flex'}, [
 							m('div', {class: 'card'}, [
 								m('div', {class: 'card-header d-flex align-items-center'}, [
-//		 							Need to find a solution to get the User mame by his STRING KEY
-//		 							m('h5',{class: ''}, item.properties.owner), 
+		 							m('h5',{class: '', id: 'title' + item.key.name}, " "), 
 									m('div', {class: 'col-sm-5 ml-auto'}, [
 										m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
 									])
@@ -211,7 +223,18 @@ var PostView = {
 				])
 			 }
 		}
-	
+		
+function printOwner(owner, id) {
+	console.log("rfor_" + id);
+	m.request({
+ 		method: "GET",
+ 		url: "_ah/api/tinyGramApi/v1/get/users/" + owner,
+ 	}).then(function(result) {
+	 		let name = result.properties.name;
+	 		console.log("name_" + name);
+	 		document.getElementById('title' + id).innerHTML = name;
+ 	});
+}	
 	
 var view = {
 	view: function() {

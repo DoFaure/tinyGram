@@ -91,7 +91,14 @@ var Posts = {
  		        	Posts.nextToken= result.nextPageToken
  	            } else {
  	            	Posts.nextToken=""
- 	            }});
+ 	            }
+	        	
+	        	setTimeout(() => {
+		            Posts.list.map(function(item) {
+		            	printOwner(item.properties.owner, item.key.name);
+		            });
+		         }, 200);
+	        });
 	    },
 	    next: function() {
 	        return m.request({
@@ -99,12 +106,26 @@ var Posts = {
 	            url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive?next="+Posts.nextToken})
 	        .then(function(result) {
 	        	console.log("got:",result)
-	        	result.items.map(function(item){Posts.list.push(item)})
+	        	
+	        	result.items.map(function(item){
+	        		Posts.list.push(item);
+	        	})
+	        	
 	            if ('nextPageToken' in result) {
 		        	Posts.nextToken= result.nextPageToken
 	            } else {
 	            	Posts.nextToken=""
-	            }})
+	            }
+	        	
+	        	setTimeout(() => {
+		            // onload finished.
+		            // and execute some code here like stat performance.
+		            
+		            Posts.list.map(function(item) {
+		            	printOwner(item.properties.owner, item.key.name);
+		            });
+		         }, 500);
+	        })
 	    }
 	}
 
@@ -162,8 +183,7 @@ var PostView = {
 				return m('div', {class: 'margin-top flex'}, [
 					m('div', {class: 'card'}, [
 						m('div', {class: 'card-header d-flex align-items-center'}, [
-// 							Need to find a solution to get the User mame by his STRING KEY
-// 							m('h5',{class: ''}, item.properties.owner), 
+							m('h5',{class: '', id: 'title' + item.key.name}, " "), 
 							m('div', {class: 'col-sm-5 ml-auto'}, [
 								m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
 							])
@@ -196,6 +216,18 @@ var PostView = {
 	 }
 }
 
+function printOwner(owner, id) {
+	console.log("rfor_" + id);
+	m.request({
+ 		method: "GET",
+ 		url: "_ah/api/tinyGramApi/v1/get/users/" + owner,
+ 	}).then(function(result) {
+	 		let name = result.properties.name;
+	 		console.log("name_" + name);
+	 		document.getElementById('title' + id).innerHTML = name;
+ 	});
+}
+
 var SuggestionView = {
 		 oninit: Users.loadList(),
 		 view: function() {
@@ -204,7 +236,6 @@ var SuggestionView = {
 			 var text = [] ;
 			 
 			 Users.list.map(function(item) {
-				 
 				 if (my_friends.includes(', '+ item.key.name + ',') || my_friends.includes('['+ item.key.name + ']') ||  my_friends.includes('['+ item.key.name + ',') || my_friends.includes(', '+ item.key.name + ']')) {
 					 class_array[item.key.name] = 'btn btn-danger btn-sm';
 					 text[item.key.name] = "Unfollow";
