@@ -24,6 +24,8 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.QueryResults;
 
 import entity.Post;
 
@@ -168,6 +170,26 @@ public class TinyGramEndpoint {
 	}
 	
 	/**
+	 * Return the list of friends of the user (string key given)
+	 * @param id  - User String key
+	 * @return List<String> name user 
+	 */
+	@ApiMethod(name = "user_followers", path="get/users/{id}/followers", httpMethod = HttpMethod.GET)
+	public List<String> userFollowers(@Named("id") String id, @Nullable @Named("next") String cursorString){
+		
+		Key user_key = KeyFactory.createKey("User", id);
+		Query q = new Query("User").setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, user_key));
+		PreparedQuery pq = datastore.prepare(q);
+		Entity user = pq.asSingleEntity();
+		List<String> followers = (List<String>) user.getProperty("followers");
+		
+		return followers;
+		
+	}
+	
+	
+	
+	/**
 	 * Return Collection of the post that the user is able to see
 	 * @param id - User String key
 	 * @return Entity User 
@@ -177,6 +199,7 @@ public class TinyGramEndpoint {
 		
 		Query q = new Query("Post").addSort("date", SortDirection.DESCENDING);
 		PreparedQuery pq = datastore.prepare(q);
+		
 		
 	    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(5);
 		
@@ -218,7 +241,9 @@ public class TinyGramEndpoint {
 	public void followUser(@Named("id_user") String id_user, @Named("id_user_to_add") String id_user_to_add){
 		
 		Transaction transac = datastore.beginTransaction();
-		try {			
+		try {
+			
+			/* ADD user_to_add to friends list */
 			Entity user = datastore.get(KeyFactory.stringToKey(id_user));
 			ArrayList<String> friends = (ArrayList<String>) user.getProperty("friends");
 			if(friends == null) {
@@ -228,7 +253,23 @@ public class TinyGramEndpoint {
 				friends.add(id_user_to_add);			
 			}
 			user.setProperty("friends", friends);
-			datastore.put(transac,user);		
+			/* ******************************* */
+			
+			/* ADD id_user to followers list */
+			Key user_to_add = KeyFactory.createKey("User", id_user_to_add);
+			Entity user_add = datastore.get(user_to_add);
+			ArrayList<String> followers = (ArrayList<String>) user_add.getProperty("followers");
+			if(followers == null) {
+				followers = new ArrayList<String>();
+			}
+			if(!followers.contains(id_user)) {
+				followers.add(id_user);			
+			}
+			user_add.setProperty("followers", followers);
+			/* ****************************** */
+			
+			datastore.put(transac,user);
+			datastore.put(transac,user_add);
 			transac.commit();
 			
 		//catch is necessary for the datastore.get() method
@@ -257,7 +298,9 @@ public class TinyGramEndpoint {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 		Transaction transac = datastore.beginTransaction();
-		try {			
+		try {	
+			
+			/* REMOVE user_to_remove to friends list */
 			Entity user = datastore.get(KeyFactory.stringToKey(id_user));
 			ArrayList<String> friends = (ArrayList<String>) user.getProperty("friends");
 			
@@ -265,7 +308,21 @@ public class TinyGramEndpoint {
 				friends.remove(id_user_to_remove);			
 			}
 			user.setProperty("friends", friends);
-			datastore.put(transac,user);		
+			/* ****************************** */
+			
+			/* REMOVE id_user to followers list */
+			Key user_to_remove = KeyFactory.createKey("User", id_user_to_remove);
+			Entity user_remove = datastore.get(user_to_remove);
+			ArrayList<String> followers = (ArrayList<String>) user_remove.getProperty("followers");
+			
+			if(followers.contains(id_user)) {
+				followers.remove(id_user);			
+			}
+			user_remove.setProperty("followers", followers);
+			/* ****************************** */
+			
+			datastore.put(transac,user);	
+			datastore.put(transac,user_remove);
 			transac.commit();
 			
 		//catch is necessary for the datastore.get() method

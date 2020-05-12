@@ -67,6 +67,9 @@ var User = {
 	        .then(function(result) {
 	        	User.data=result.properties;
 	        	console.log("got:",User.data)
+	        	setTimeout(() => {
+		            	printFollowers(result.key.name);
+		         }, 200);
             });
 	    },
 }
@@ -150,10 +153,10 @@ var ProfileView = {
 
 				  			]),
 				  			m('div', {class: 'col'}, [
-				  				m('b', {class: ''}, "nb followers")
+				  				m('b', {class: '', id: "followers"}, "nb followers")
 				  			]),
 				  			m('div', {class: 'col'}, [
-	 			  				m('b', {class: ''}, Object.size(User.data.friends)+" friends")
+	 			  				m('b', {class: ''}, Object.size(User.data.friends)+" follows")
 				  			])
 				  		]),
 				  		m('div', {class: 'row'}, [
@@ -225,7 +228,6 @@ var PostView = {
 		}
 		
 function printOwner(owner, id) {
-	console.log("rfor_" + id);
 	m.request({
  		method: "GET",
  		url: "_ah/api/tinyGramApi/v1/get/users/" + owner,
@@ -286,6 +288,20 @@ function updateLike(id) {
 		setTimeout(updateLike(id), 1000);
 	}
 	
+}
+
+function printFollowers(id) {
+	m.request({
+ 		method: "GET",
+ 		url: "_ah/api/tinyGramApi/v1/get/users/"+ id +"/followers",
+ 	}).then(function(result) {
+	 		let name = result;
+	 		if(result == null){
+	 			document.getElementById("followers").innerHTML = "0 followers"
+	 		}else{
+	 			document.getElementById("followers").innerHTML = Object.size(result) + " followers"
+	 		}
+ 	});
 }
 
 
