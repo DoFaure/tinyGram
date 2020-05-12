@@ -83,7 +83,8 @@ var Posts = {
 		    console.log("request")
 	        return m.request({
 	            method: "GET",
-	            url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive"})
+	            url:"_ah/api/tinyGramApi/v1/get/posts"})
+	           // url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive"})
 	        .then(function(result) {
 	        	Posts.list=result.items;
 	        	console.log("got:",result)
@@ -103,7 +104,8 @@ var Posts = {
 	    next: function() {
 	        return m.request({
 	            method: "GET",
-	            url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive?next="+Posts.nextToken})
+	            url:"_ah/api/tinyGramApi/v1/get/posts?next="+Posts.nextToken})
+	           // url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive?next="+Posts.nextToken})
 	        .then(function(result) {
 	        	console.log("got:",result)
 	        	
@@ -217,13 +219,11 @@ var PostView = {
 }
 
 function printOwner(owner, id) {
-	console.log("rfor_" + id);
 	m.request({
  		method: "GET",
  		url: "_ah/api/tinyGramApi/v1/get/users/" + owner,
  	}).then(function(result) {
 	 		let name = result.properties.name;
-	 		console.log("name_" + name);
 	 		document.getElementById('title' + id).innerHTML = name;
  	});
 }

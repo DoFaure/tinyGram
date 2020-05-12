@@ -51,12 +51,20 @@ public class TinyGramEndpoint {
 	 * Return the first Posts by limit 
 	 */
 	@ApiMethod(name = "posts", path="get/posts",	httpMethod = HttpMethod.GET)
-	public List<Entity> posts() {
-			Query q =new Query("Post").addSort("date", SortDirection.ASCENDING);
+	public CollectionResponse<Entity> posts(@Nullable @Named("next") String cursorString) {
+			Query q =new Query("Post").addSort("date", SortDirection.DESCENDING);
 
 			PreparedQuery pq = datastore.prepare(q);
-			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
-			return result;
+			FetchOptions fetchOptions = FetchOptions.Builder.withLimit(5);
+			    
+		    if (cursorString != null) {
+			fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
+			}
+		    
+		    QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+		    cursorString = results.getCursor().toWebSafeString();
+		    
+		    return CollectionResponse.<Entity>builder().setItems(results).setNextPageToken(cursorString).build();    
 	}	
 	
 	/**
@@ -170,8 +178,8 @@ public class TinyGramEndpoint {
 	}
 	
 	/**
-	 * Return the list of friends of the user (string key given)
-	 * @param id  - User String key
+	 * Return the followers's list of the user (no hash string key given)
+	 * @param id  - User no hash String key
 	 * @return List<String> name user 
 	 */
 	@ApiMethod(name = "user_followers", path="get/users/{id}/followers", httpMethod = HttpMethod.GET)
