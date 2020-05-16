@@ -9,7 +9,7 @@ Basically you can :
 * List new posts
 * Like a post
 
-Every data are stored in Google Datastore manage using Endpoints	(API)
+The UI calls REST services written in Java with Google Cloud Endpoint (API)
 
 
 ## Import and run in eclipse
