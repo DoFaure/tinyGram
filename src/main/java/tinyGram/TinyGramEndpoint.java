@@ -68,22 +68,6 @@ public class TinyGramEndpoint {
 	}	
 	
 	/**
-	 * Return the list of the users who can see the post (string key given)
-	 * @param id - Post String key
-	 * @return List<String> receiversPost
-	 */
-	@ApiMethod(name = "receivers_post", path="get/posts/{id}/receivers", httpMethod = HttpMethod.GET)
-	public List<String> postsReceivers(@Named("id") String id){
-		
-		Query q = new Query("Post").setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, KeyFactory.stringToKey(id)));
-		PreparedQuery pq = datastore.prepare(q);
-		Entity result = pq.asSingleEntity();
-		List<String> receivers = (List<String>) result.getProperty("receivers");
-		return receivers;
-		
-	}
-	
-	/**
 	 * Return the list of the users that likes the post (string given) 
 	 * @param id - Post String key
 	 * @return List<String> List of users 
@@ -201,28 +185,25 @@ public class TinyGramEndpoint {
 	 * Return Collection of the post that the user is able to see
 	 * @param id - User String key
 	 * @return Entity User 
+	 * @throws EntityNotFoundException 
 	 */
 	@ApiMethod(name = "user", path="get/users/{id}/receive", httpMethod = HttpMethod.GET)
-	public CollectionResponse<Entity> postsUserCanSee(@Named("id") String id, @Nullable @Named("next") String cursorString){
+	public CollectionResponse<Entity> postsUserCanSee(@Named("id") String id, @Nullable @Named("next") String cursorString) throws EntityNotFoundException{
 		
 		Query q = new Query("Post").addSort("date", SortDirection.DESCENDING);
 		PreparedQuery pq = datastore.prepare(q);
 		
 		
-	    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(5);
+	    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
 		
 	    QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
 	    
 		for(Entity post : results) {
-			List<String> receivers = (List<String>) post.getProperty("receivers");
-			if(receivers != null) {
-				if(!receivers.contains(id)) {
-					results.remove(post);
-				}
-			}else {
+			Entity postOwner = datastore.get(KeyFactory.stringToKey((String) post.getProperty("owner")));
+			ArrayList<String> followers = (ArrayList<String>) postOwner.getProperty("followers");
+			if(!followers.contains(id)) {
 				results.remove(post);
 			}
-		
 		}
 		   
 	    if (cursorString != null) {

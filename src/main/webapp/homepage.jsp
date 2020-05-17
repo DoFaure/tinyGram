@@ -83,8 +83,8 @@ var Posts = {
 		    console.log("request")
 	        return m.request({
 	            method: "GET",
-	            url:"_ah/api/tinyGramApi/v1/get/posts"})
-	           // url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive"})
+	            //url:"_ah/api/tinyGramApi/v1/get/posts"})
+	           url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive"})
 	        .then(function(result) {
 	        	Posts.list=result.items;
 	        	console.log("got:",result)
@@ -104,8 +104,8 @@ var Posts = {
 	    next: function() {
 	        return m.request({
 	            method: "GET",
-	            url:"_ah/api/tinyGramApi/v1/get/posts?next="+Posts.nextToken})
-	           // url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive?next="+Posts.nextToken})
+	            //url:"_ah/api/tinyGramApi/v1/get/posts?next="+Posts.nextToken})
+	           url: "_ah/api/tinyGramApi/v1/get/users/" + "${KeyFactory.keyToString(entity.key)}" + "/receive?next="+Posts.nextToken})
 	        .then(function(result) {
 	        	console.log("got:",result)
 	        	
