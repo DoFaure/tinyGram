@@ -43,6 +43,7 @@
 	</nav>
  
  <div class="container">
+	<div id="n_posts"></div>
 	<div id="script"></div>
  </div>
  
@@ -97,6 +98,8 @@ var Posts = {
 		            Posts.list.map(function(item) {
 		            	printOwner(item.properties.owner, item.key.name);
 		            });
+		            
+		            Ob
 		         }, 200);
             });    
 	    },
@@ -142,15 +145,14 @@ var Likes = {
 var ProfileView = {
 			 oninit: User.loadList(),
 			 view: function() {
+				 let size = Object.size(Posts.list);
 			 return m('div', {class:'media profile-information'},[
 				  	m('img', {class:'align-self-center mr-3 profile-logo', src: "/resources/img/user.png"}),
 			  		m('div', {class: 'media-body profile-information-body'}, [
 						m('h5', {class: 'mt-0'}, User.data.name),
 				  		m('div', {class: 'row'}, [
 				  			m('div', {class: 'col'}, [
-	 			  				//m('b', {class: ''}, Object.size(Posts.list)+" posts")
-	 			  				m('b', {class: ''}, "nb posts")
-
+	 			  				m('b', {class: ''}, size + " posts"),
 				  			]),
 				  			m('div', {class: 'col'}, [
 				  				m('b', {class: '', id: "followers"}, "nb followers")
