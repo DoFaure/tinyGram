@@ -3,6 +3,7 @@ package tinyGram;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.api.server.spi.config.Api;
@@ -12,6 +13,7 @@ import com.google.api.server.spi.config.Named;
 import com.google.api.server.spi.config.Nullable;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.response.CollectionResponse;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -24,14 +26,18 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.repackaged.com.google.datastore.v1.PropertyOrder.Direction;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.QueryResults;
 
 import entity.Post;
 
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.QueryResultIterable;
 
 
 @Api(name = "tinyGramApi",
@@ -182,39 +188,43 @@ public class TinyGramEndpoint {
 	
 	
 	/**
-	 * Return Collection of the post that the user is able to see
+     * Return Collection of the post that the user is able to see
 	 * @param id - User String key
-	 * @return Entity User 
-	 * @throws EntityNotFoundException 
-	 */
+     * @param cursorString
+     * @return CollectionResponse<Entity> TGPost
+     * @throws UnauthorizedException
+     * @throws EntityNotFoundException
+     */
 	@ApiMethod(name = "user", path="get/users/{id}/receive", httpMethod = HttpMethod.GET)
-	public CollectionResponse<Entity> postsUserCanSee(@Named("id") String id, @Nullable @Named("next") String cursorString) throws EntityNotFoundException{
+    public CollectionResponse<Entity> postsUserCanSee(@Named("id") String id, @Nullable @Named("next") String cursorString) throws EntityNotFoundException {
 		
-		Query q = new Query("Post").addSort("date", SortDirection.DESCENDING);
-		PreparedQuery pq = datastore.prepare(q);
-		
-		
-	    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
-		
-	    QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
-	    
-		for(Entity post : results) {
-			Entity postOwner = datastore.get(KeyFactory.stringToKey((String) post.getProperty("owner")));
-			ArrayList<String> followers = (ArrayList<String>) postOwner.getProperty("followers");
-			if(!followers.contains(id)) {
-				results.remove(post);
-			}
-		}
-		   
-	    if (cursorString != null) {
-		    	fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
-		}
-		
+		if(cursorString != null) {
+			Key post = KeyFactory.createKey("Post", cursorString);
+			Filter propertyPostsFilterPaginate = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN, post);
+			Filter userFilter = new FilterPredicate("receivers", FilterOperator.EQUAL, id);
+	        Query q = new Query("Post").setFilter(CompositeFilterOperator.and(userFilter, propertyPostsFilterPaginate)).addSort("__key__", SortDirection.ASCENDING);
+	        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	        PreparedQuery pq = datastore.prepare(q);
+	        FetchOptions fetchOptions = FetchOptions.Builder.withLimit(20);
 
-		cursorString = results.getCursor().toWebSafeString();
-		
-		return CollectionResponse.<Entity>builder().setItems(results).setNextPageToken(cursorString).build();
-	}
+	        // retriving all the posts
+
+	        QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+	        return CollectionResponse.<Entity>builder().setItems(results).build();  
+		}else {
+	        Query q = new Query("Post").setFilter(new FilterPredicate("receivers", FilterOperator.EQUAL, id)).addSort("__key__", SortDirection.ASCENDING);
+	        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	        PreparedQuery pq = datastore.prepare(q);
+	        FetchOptions fetchOptions = FetchOptions.Builder.withLimit(20);
+
+	        // retriving all the posts
+
+	        QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+	        return CollectionResponse.<Entity>builder().setItems(results).build();   
+		}       
+       
+    }
+	
 
 //--------------------------------------------------- ALL THE PUT ---------------------------------------------------------//
 	
@@ -303,9 +313,10 @@ public class TinyGramEndpoint {
 			Key user_to_remove = KeyFactory.createKey("User", id_user_to_remove);
 			Entity user_remove = datastore.get(user_to_remove);
 			ArrayList<String> followers = (ArrayList<String>) user_remove.getProperty("followers");
-			
-			if(followers.contains(id_user)) {
-				followers.remove(id_user);			
+			if(followers != null) {
+				if(followers.contains(id_user)) {
+					followers.remove(id_user);			
+				}
 			}
 			user_remove.setProperty("followers", followers);
 			/* ****************************** */
@@ -404,6 +415,87 @@ public class TinyGramEndpoint {
 		
 		return post;
 	}
+	
+	/**
+	 * Update receivers posts from an owner. Update the Post receivers list from owner given by removing an user
+	 *  
+	 * @param id_owner
+	 * @param id_to_remove
+	 * @return 
+	 * @return 
+	 * @throws EntityNotFoundException 
+	 */
+	@ApiMethod(name = "remove_receivers_posts", path="put/posts/owner/{id_owner}/receivers/remove/{id_to_remove}", httpMethod = HttpMethod.PUT)
+	public QueryResultList<Entity> removereceiverposts(@Named("id_owner") String id_owner, @Named("id_to_remove") String id_to_remove) throws EntityNotFoundException{
+		
+		Key owner = KeyFactory.createKey("User", id_owner);
+		Query q = new Query("Post").setFilter(new FilterPredicate("owner", FilterOperator.EQUAL, KeyFactory.keyToString(owner)));
+
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        PreparedQuery pq = datastore.prepare(q);
+
+        FetchOptions fetchOptions = FetchOptions.Builder.withLimit(20);
+
+        // retriving all the posts
+
+        QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+
+		for(Entity post: results) {
+			ArrayList<String> receivers =  (ArrayList<String>) post.getProperty("receivers");
+			if(receivers.contains(id_to_remove)) {
+				receivers.remove(id_to_remove);
+			}
+			post.setProperty("receivers", receivers);	
+			
+			Transaction txn = datastore.beginTransaction();
+			datastore.put(post);
+			txn.commit();
+		}
+		
+		 return results;
+	}
+	
+	/**
+	 * Update receivers posts from an owner. Update the Post receivers list from owner given by adding an user
+	 *  
+	 * @param id_owner
+	 * @param id_to_add
+	 * @return 
+	 * @return 
+	 * @throws EntityNotFoundException 
+	 */
+	@ApiMethod(name = "add_receivers_posts", path="put/posts/owner/{id_owner}/receivers/add/{id_to_add}", httpMethod = HttpMethod.PUT)
+	public QueryResultIterable<Entity> addreceiverposts(@Named("id_owner") String id_owner, @Named("id_to_add") String id_to_add) throws EntityNotFoundException{
+		
+		Key owner = KeyFactory.createKey("User", id_owner);
+		Query q = new Query("Post").setFilter(new FilterPredicate("owner", FilterOperator.EQUAL, KeyFactory.keyToString(owner)));
+
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        PreparedQuery pq = datastore.prepare(q);
+        // retriving all the posts
+
+        QueryResultIterable<Entity> results = pq.asQueryResultIterable();
+
+		for(Entity post: results) {
+			ArrayList<String> receivers =  (ArrayList<String>) post.getProperty("receivers");
+			
+			if(receivers == null) {
+				receivers = new ArrayList<String>();
+			}
+			
+			if(!receivers.contains(id_to_add)) {
+				receivers.add(id_to_add);
+			}
+			post.setProperty("receivers", receivers);	
+    		
+			Transaction txn = datastore.beginTransaction();
+    		datastore.put(post);
+			txn.commit();
+		}
+         
+        return results;
+	}
+
 
 //--------------------------------------------------- ALL THE POST ---------------------------------------------------------//
 
@@ -411,14 +503,15 @@ public class TinyGramEndpoint {
 	 * 
 	 * @param Post 
 	 * @return Created Post
+	 * @throws EntityNotFoundException 
 	 */
 	@ApiMethod(name = "createpost", path="post/posts/create", httpMethod = HttpMethod.POST)
-	public Entity createPost(Post pm) {
+	public Entity createPost(Post pm) throws EntityNotFoundException {
 
 		long epochNow = Instant.now().getEpochSecond();
 		String id = Long.toString(Long.MAX_VALUE-epochNow);
 		
-		
+		Entity user = datastore.get(KeyFactory.stringToKey(pm.owner));
 		Entity e = new Entity("Post", id);
 		e.setProperty("owner", pm.owner);
 		if(pm.url.equals("")) {
@@ -430,7 +523,7 @@ public class TinyGramEndpoint {
 		}
 		e.setProperty("body", pm.body);
 		e.hasProperty("likes");
-		e.hasProperty("receivers");
+		e.setProperty("receivers", user.getProperty("followers"));
 		e.setProperty("date", epochNow);
 
 		Transaction txn = datastore.beginTransaction();

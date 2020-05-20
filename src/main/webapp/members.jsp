@@ -48,14 +48,14 @@
 	  </a>
 	  <form class="form-inline nav navbar-nav navbar-center">
 	    <div class="input-group">
-	      <div class="input-group-prepend">
+	      <!-- <div class="input-group-prepend">
 	        <span class="input-group-text" id="basic-addon1">@</span>
-	      </div>
-	      <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+	      </div> -->
+	      <!-- <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1"> -->
 	    </div>
 	  </form>
 	  <div class="nav navbar-nav navbar-right">
-	 	  <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a>
+	<!--  	  <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a> -->
   	      <a class="profile" href="/profile?user=${entity.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  </div>
 	</nav>
@@ -178,6 +178,12 @@ function follow(id) {
 		     	params: data,
 		 	}).then(function(result) {
 			 	console.log("ok:",result)
+			 	m.request({
+		 			method: "PUT",
+			 		url: "_ah/api/tinyGramApi/v1/put/posts/owner/" + id + "/receivers/add/" + "${KeyFactory.keyToString(entity.key)}",
+		 		}).then(function(result){
+		 			console.log("follow receive :" + result)
+		 		})
 		 	 });
 		} else {
 			document.getElementById(id).className = 'btn btn-primary btn-sm';
@@ -194,6 +200,12 @@ function follow(id) {
 		     	params: data,
 		 	}).then(function(result) {
 			 	console.log("ok:",result)
+			 	m.request({
+		 			method: "PUT",
+			 		url: "_ah/api/tinyGramApi/v1/put/posts/owner/" + id + "/receivers/remove/" + "${KeyFactory.keyToString(entity.key)}" ,
+		 		}).then(function(result){
+		 			console.log("unfollow receive :" + result)
+		 		})
 		 	 });
 			}
 	}

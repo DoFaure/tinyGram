@@ -30,15 +30,15 @@
 	  </a>
 	  <form class="form-inline nav navbar-nav navbar-center">
 	    <div class="input-group">
-	      <div class="input-group-prepend">
+	     <!--  <div class="input-group-prepend">
 	        <span class="input-group-text" id="basic-addon1">@</span>
-	      </div>
-	      <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+	      </div> -->
+	      <!-- <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1"> -->
 	    </div>
 	  </form>
 	  <div class="nav navbar-nav navbar-right">
-	 	  <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a>
- 	 	  <a class="profile" href="/profile?user=${actualU.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
+	 	  <!-- <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a> -->
+ 	 	   <a class="profile" href="/profile?user=${actualU.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  </div>
 	</nav>
  
@@ -95,11 +95,11 @@ var Posts = {
  	            }
 	        	
 	        	setTimeout(() => {
-		            Posts.list.map(function(item) {
-		            	printOwner(item.properties.owner, item.key.name);
-		            });
-		            
-		            Ob
+	        		if(typeof(Posts.list) !== 'undefined'){
+			            Posts.list.map(function(item) {
+			            	printOwner(item.properties.owner, item.key.name);
+			            });
+	        		}
 		         }, 200);
             });    
 	    },
@@ -117,9 +117,11 @@ var Posts = {
 	            }
 	        	
 	        	setTimeout(() => {
-		            Posts.list.map(function(item) {
-		            	printOwner(item.properties.owner, item.key.name);
-		            });
+					if(typeof(Posts.list) !== 'undefined'){
+			            Posts.list.map(function(item) {
+			            	printOwner(item.properties.owner, item.key.name);
+			            });
+					}
 		         }, 200);
 	        })
 	    }
@@ -179,53 +181,55 @@ var PostView = {
 			 view: function() {
 				 var class_array = [];
 				 
-				 Posts.list.map(function(item) {
-					 if(item.properties.likes){
-						 if (item.properties.likes.includes("${KeyFactory.keyToString(actualU.key)}")) {
-							 class_array[item.key.name] = 'fa fa-heart';
-						 } else {
-							 class_array[item.key.name]= 'fa fa-heart-o';
+				 if(typeof(Posts.list) !== 'undefined'){
+					 Posts.list.map(function(item) {
+						 if(item.properties.likes){
+							 if (item.properties.likes.includes("${KeyFactory.keyToString(actualU.key)}")) {
+								 class_array[item.key.name] = 'fa fa-heart';
+							 } else {
+								 class_array[item.key.name]= 'fa fa-heart-o';
+							 }
+						 }else{
+							 class_array[item.key.name] = 'fa fa-heart-o';
 						 }
-					 }else{
-						 class_array[item.key.name] = 'fa fa-heart-o';
-					 }
-				 });
-				 
-				return m('div', [
-					Posts.list.map(function(item) {
-						return m('div', {class: 'margin-top flex'}, [
-							m('div', {class: 'card'}, [
-								m('div', {class: 'card-header d-flex align-items-center'}, [
-		 							m('h5',{class: '', id: 'title' + item.key.name}, " "), 
-									m('div', {class: 'col-sm-5 ml-auto'}, [
-										m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
-									])
-								]),
-								m('img',{class: 'card-img-top', 'src': item.properties.URL}),
-								m('div', {class: 'card-body'}, [
-									m('p', {class: ''}, item.properties.body)
-								]),
-								m('div', {class: 'card-footer text-muted'}, [
-									m('div', {class: 'card-text user-action-likes'}, [
-										m('div',[
-											m('a', {class: 'icon-block'}, [
-												m('i', {class: class_array[item.key.name], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
-											])
-										]),
-									    m('div',{class:'likes ' + item.key.name} ," " + Object.size(item.properties.likes) + " likes"),
+					 });
+					 
+					return m('div', [
+						Posts.list.map(function(item) {
+							return m('div', {class: 'margin-top flex'}, [
+								m('div', {class: 'card'}, [
+									m('div', {class: 'card-header d-flex align-items-center'}, [
+			 							m('h5',{class: '', id: 'title' + item.key.name}, " "), 
+										m('div', {class: 'col-sm-5 ml-auto'}, [
+											m('h6',{class: 'date'}, new Date(item.properties.date * 1000).toLocaleString() )
+										])
+									]),
+									m('img',{class: 'card-img-top', 'src': item.properties.URL}),
+									m('div', {class: 'card-body'}, [
+										m('p', {class: ''}, item.properties.body)
+									]),
+									m('div', {class: 'card-footer text-muted'}, [
+										m('div', {class: 'card-text user-action-likes'}, [
+											m('div',[
+												m('a', {class: 'icon-block'}, [
+													m('i', {class: class_array[item.key.name], style: 'color: #FF0000', id: item.key.name, onclick: function() {updateLike(item.key.name)}, onload: function() {updateLike(item.key.name)}}, '')
+												])
+											]),
+										    m('div',{class:'likes ' + item.key.name} ," " + Object.size(item.properties.likes) + " likes"),
+										])
 									])
 								])
-							])
-						]);
-					}),
-					m('div', {class: 'seeMore'}, [
-						  m('button',{
-						      class: 'btn btn-outline-secondary btn-sm is-link',
-						      onclick: function(e) {Posts.next()}
-						      },
-						  "Next"),
+							]);
+						}),
+						m('div', {class: 'seeMore'}, [
+							  m('button',{
+							      class: 'btn btn-outline-secondary btn-sm is-link',
+							      onclick: function(e) {Posts.next()}
+							      },
+							  "Next"),
+						])
 					])
-				])
+				 }
 			 }
 		}
 		
