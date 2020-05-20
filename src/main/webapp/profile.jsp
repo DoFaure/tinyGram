@@ -37,7 +37,7 @@
 	    </div>
 	  </form>
 	  <div class="nav navbar-nav navbar-right">
-	 	  <!-- <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a> -->
+	 	  <!-- <a class="like" href="/followers"><img class="icon-nav" src="/resources/img/heart.png"></a>-->
  	 	   <a class="profile" href="/profile?user=${actualU.properties.mail}"><img class="icon-nav" src="/resources/img/user.png"></a>
 	  </div>
 	</nav>
