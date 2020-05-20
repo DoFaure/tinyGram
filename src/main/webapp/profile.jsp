@@ -305,7 +305,7 @@ function printFollowers(id) {
 	 		if(result == null){
 	 			document.getElementById("followers").innerHTML = "0 followers"
 	 		}else{
-	 			document.getElementById("followers").innerHTML = Object.size(result) + " followers"
+	 			document.getElementById("followers").innerHTML = result.items.length + " followers"
 	 		}
  	});
 }
