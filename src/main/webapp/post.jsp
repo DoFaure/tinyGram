@@ -57,6 +57,7 @@ document.location.href="/profile?user=${entity.properties.mail}";}
 
 var MyPost = {
 	    postMessage: function() {
+	    	document.getElementById("buttonPost").disabled = true;
  			var data={
  					'owner':"${KeyFactory.keyToString(entity.key)}",
  					'url':PostForm.url,
@@ -100,7 +101,7 @@ var PostForm = {
 		        placeholder:"Your text",
 		        oninput: function(e) { PostForm.body = e.target.value }}),
 		        ]),
-		      m('div',{class:'control'},m("button[type=submit]", {class:'btn btn-primary is-link'},"Post")),
+		      m('div',{class:'control'},m("button[type=submit]", {class:'btn btn-primary is-link', id:'buttonPost'},"Post")),
 		    ])
 		  }
 		}
