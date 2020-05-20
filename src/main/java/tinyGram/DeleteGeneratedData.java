@@ -22,7 +22,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 @WebServlet(name = "DeleteData", urlPatterns = { "/deletedatas" })
-public class DeleteGenerateData extends HttpServlet{
+public class DeleteGeneratedData extends HttpServlet{
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {	

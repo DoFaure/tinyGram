@@ -64,6 +64,17 @@
   text-align: center !important;
 }
 
+/* div like/unlike action */
+.user-action-likes{
+	display: flex !important;
+	clear: none;
+}
+
+.likes{
+    margin-left: 5px;
+}
+/* ********************* */
+
 .identity, .follow {
     display: inline-block;
     vertical-align: middle;
@@ -76,10 +87,8 @@
 }
 
 .signout{
-  	display: flex;
-  	align-items: center;
-  	justify-content: center;
-  	margin-top: 20px;
+  	align-items : center;
+  	text-align : center;
 }
 
 /* PROFILE.jsp class */
@@ -98,4 +107,9 @@
 	margin-right: 15px;
 	margin-left: 15px;
 	margin-bottom: 15px;
+}
+
+.titlePost{
+	text-align:center;
+	margin : 10px;
 }
